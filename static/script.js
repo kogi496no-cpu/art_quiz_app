@@ -90,7 +90,8 @@ async function handleUploadSubmit(e) {
             const result = await response.json();
             showMessage(result.message + (result.image_uploaded ? '（画像付き）' : ''), 'success');
             e.target.reset();
-            if (!document.getElementById('artworks-list').classList.contains('hidden')) {
+            const artworksList = document.getElementById('artworks-list');
+            if (artworksList && !artworksList.classList.contains('hidden')) {
                 loadArtworks();
             }
         } else {
@@ -98,12 +99,12 @@ async function handleUploadSubmit(e) {
             showMessage('エラー: ' + (errorData.detail || '保存に失敗しました'), 'error');
         }
     } catch (error) {
-        showMessage('ネットワークエラーが発生しました', 'error');
+        showMessage('エラー: ' + (error.message || error || 'ネットワークエラーが発生しました'), 'error', error);
     }
 }
 
 // メッセージ表示機能
-function showMessage(message, type = 'info') {
+function showMessage(message, type = 'info', e) {
     const existingMessage = document.querySelector('.message');
     if (existingMessage) {
         existingMessage.remove();
@@ -113,6 +114,8 @@ function showMessage(message, type = 'info') {
     messageDiv.textContent = message;
     document.body.appendChild(messageDiv);
     setTimeout(() => messageDiv.remove(), 3000);
+    console.log(message);
+    if (e) console.error(e);
 }
 
 // クイズ表示機能
