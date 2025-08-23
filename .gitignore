@@ -2,5 +2,7 @@ _pycache_/
 .vscode/
 *.db
 uploads/images/*
+uploads/thumbnails/*
 # ただし .gitkeep は除外しない（後述）
 !uploads/images/.gitkeep
+!uploads/thumbnails/.gitkeep

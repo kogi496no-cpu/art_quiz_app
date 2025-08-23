@@ -1,5 +1,7 @@
 
+
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from artworks import router as artworks_router
 from pydantic import BaseModel, validator
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -17,6 +19,7 @@ from PIL import Image
 import shutil
 
 app = FastAPI()
+app.include_router(artworks_router)
 
 # 静的ファイル配信の設定
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -507,3 +510,11 @@ def reset_quiz_results():
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail="リセットに失敗しました")
+    
+@app.get("/artworks-page", response_class=HTMLResponse)
+async def artworks_page(request: Request):
+    return templates.TemplateResponse("artworks.html", {"request": request})
+
+@app.get("/quiz-page", response_class=HTMLResponse)
+async def quiz_page(request: Request):
+    return templates.TemplateResponse("quiz.html", {"request": request})

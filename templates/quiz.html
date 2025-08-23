@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美術検定クイズ</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <h1 class="text-center">美術検定クイズアプリ</h1>
+    <div class="text-center mt-3">
+      <a href="/" class="btn mb-3">トップページへ</a>
+      <a href="/artworks-page" class="btn">作品管理ページへ</a>
+    </div>
+    <!-- クイズセクション -->
+    <section>
+      <h2>クイズに挑戦</h2>
+      <div class="quiz-mode-selector mb-3">
+        <button onclick="setQuizMode('simple')" class="btn btn-secondary" id="simple-mode-btn">穴埋めクイズ</button>
+        <button onclick="setQuizMode('multiple')" class="btn" id="multiple-mode-btn">4択クイズ</button>
+      </div>
+      <button onclick="loadQuiz()" class="btn mb-3" id="quiz-start-btn">クイズを出題</button>
+      <div id="quiz-area"></div>
+      <!-- 統計表示エリア -->
+      <div id="stats-area" class="hidden mt-3">
+        <button onclick="toggleStats()" class="btn btn-secondary mb-3">統計を表示</button>
+        <button onclick="resetQuizStats()" class="btn btn-danger mb-3" id="reset-quiz-btn">正答率リセット</button>
+        <div id="stats-content" class="hidden"></div>
+      </div>
+    </section>
+  </div>
+  <script src="/static/script.js"></script>
+</body>
+</html>
