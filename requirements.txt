@@ -1,0 +1,6 @@
+fastapi
+pydantic
+jinja2
+pillow
+python-multipart
+uvicorn

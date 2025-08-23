@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美術検定クイズ</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <h1 class="text-center">美術検定クイズアプリ</h1>
+    
+    <!-- 作品登録セクション -->
+    <section>
+      <h2>作品登録</h2>
+      <form id="art-form-upload" enctype="multipart/form-data">
+        <label for="upload-author">作者:</label>
+        <input type="text" id="upload-author" name="author" required>
+
+        <label for="upload-title">作品名:</label>
+        <input type="text" id="upload-title" name="title" required>
+
+        <label for="upload-style">美術様式:</label>
+        <input type="text" id="upload-style" name="style" required>
+
+        <label for="upload-notes">備考:</label>
+        <textarea id="upload-notes" name="notes" rows="3"></textarea>
+
+        <label for="upload-image">画像ファイル:</label>
+        <input type="file" id="upload-image" name="image" accept="image/*">
+        <small>JPEG, PNG, WebP, GIF対応（最大5MB）</small>
+
+        <button type="submit" class="btn">保存</button>
+      </form>
+    </section>
+
+    <!-- クイズセクション -->
+    <section>
+      <h2>クイズに挑戦</h2>
+      <div class="quiz-mode-selector mb-3">
+        <button onclick="setQuizMode('simple')" class="btn btn-secondary" id="simple-mode-btn">穴埋めクイズ</button>
+        <button onclick="setQuizMode('multiple')" class="btn" id="multiple-mode-btn">4択クイズ</button>
+      </div>
+      
+      <button onclick="loadQuiz()" class="btn mb-3" id="quiz-start-btn">クイズを出題</button>
+      <div id="quiz-area"></div>
+      
+      <!-- 統計表示エリア -->
+      <div id="stats-area" class="hidden mt-3">
+        <button onclick="toggleStats()" class="btn btn-secondary mb-3">統計を表示</button>
+        <div id="stats-content" class="hidden"></div>
+      </div>
+    </section>
+
+    <!-- 作品管理セクション -->
+    <section>
+      <h2>作品管理</h2>
+      <button id="toggle-artworks-btn" class="btn mb-3">作品一覧を表示</button>
+      <div id="artworks-list" class="hidden"></div>
+    </section>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeEditModal()">&times;</span>
+      <h2>作品編集</h2>
+      <form id="edit-form">
+        <input type="hidden" id="edit-artwork-id">
+        <label for="edit-author">作者:</label>
+        <input type="text" id="edit-author" name="author" required>
+
+        <label for="edit-title">作品名:</label>
+        <input type="text" id="edit-title" name="title" required>
+
+        <label for="edit-style">美術様式:</label>
+        <input type="text" id="edit-style" name="style" required>
+
+        <label for="edit-notes">備考:</label>
+        <textarea id="edit-notes" name="notes" rows="4"></textarea>
+
+        <button type="submit" class="btn">更新</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
