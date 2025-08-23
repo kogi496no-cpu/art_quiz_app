@@ -31,6 +31,28 @@ function initializeEventListeners() {
     if (editForm) {
         editForm.addEventListener('submit', handleEditSubmit);
     }
+
+    // 正答率リセットボタン
+    const resetBtn = document.getElementById('reset-quiz-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetQuizStats);
+    }
+// クイズ統計リセット
+async function resetQuizStats() {
+    if (!confirm('本当にクイズ結果をリセットしますか？')) return;
+    try {
+        const res = await fetch('/quiz/reset', { method: 'POST' });
+        if (res.ok) {
+            showMessage('クイズ結果をリセットしました', 'success');
+            loadStats();
+        } else {
+            const err = await res.json();
+            showMessage('リセット失敗: ' + (err.detail || '不明なエラー'), 'error');
+        }
+    } catch (error) {
+        showMessage('ネットワークエラーが発生しました', 'error');
+    }
+}
 }
 
 // HTMLエスケープ関数

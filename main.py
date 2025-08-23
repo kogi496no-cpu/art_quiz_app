@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, validator
 from fastapi.responses import HTMLResponse, FileResponse
@@ -495,3 +496,14 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def read_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.post("/quiz/reset")
+def reset_quiz_results():
+    try:
+        c.execute("DELETE FROM quiz_results")
+        conn.commit()
+        return {"message": "クイズ結果をリセットしました"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail="リセットに失敗しました")
