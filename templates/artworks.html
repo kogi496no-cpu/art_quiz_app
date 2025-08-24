@@ -18,6 +18,31 @@
     <button onclick="window.location.href='/'" class="btn mb-3">トップページへ戻る</button>
     <div id="artworks-list"></div>
   </div>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeEditModal()">&times;</span>
+      <h2>作品編集</h2>
+      <form id="edit-form">
+        <input type="hidden" id="edit-artwork-id">
+        <label for="edit-author">作者:</label>
+        <input type="text" id="edit-author" name="author" required>
+
+        <label for="edit-title">作品名:</label>
+        <input type="text" id="edit-title" name="title" required>
+
+        <label for="edit-style">美術様式:</label>
+        <input type="text" id="edit-style" name="style" required>
+
+        <label for="edit-notes">備考:</label>
+        <textarea id="edit-notes" name="notes" rows="4"></textarea>
+
+        <button type="submit" class="btn">更新</button>
+      </form>
+    </div>
+  </div>
+
   <script src="/static/script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {

@@ -2,10 +2,13 @@ from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
+from pydantic import BaseModel, validator
 import sqlite3
 import os
 import uuid
 from PIL import Image
+import re
+import html
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -78,6 +81,33 @@ def save_image_with_thumbnail(file: UploadFile) -> tuple[str, str, int]:
 # DB接続（本来はmain.pyからimport推奨）
 conn = sqlite3.connect("art.db", check_same_thread=False)
 c = conn.cursor()
+
+# 更新用モデル
+class ArtworkUpdate(BaseModel):
+    author: str
+    title: str
+    style: str
+    notes: Optional[str] = None
+
+    @validator('author', 'title', 'style')
+    def sanitize_text_fields(cls, v):
+        if not v:
+            return v
+        cleaned = re.sub(r'<[^>]*>', '', v)
+        cleaned = html.escape(cleaned)
+        if len(cleaned) > 200:
+            raise ValueError('入力文字数が長すぎます（200文字以内）')
+        return cleaned.strip()
+
+    @validator('notes')
+    def sanitize_notes(cls, v):
+        if not v:
+            return v
+        cleaned = re.sub(r'<[^>]*>', '', v)
+        cleaned = html.escape(cleaned)
+        if len(cleaned) > 1000:
+            raise ValueError('備考が長すぎます（1000文字以内）')
+        return cleaned.strip()
 
 @router.get("/artworks-page", response_class=HTMLResponse)
 async def artworks_page(request: Request):
@@ -179,6 +209,34 @@ async def add_artwork_with_image(
                 pass  # エラーは無視（データベースロールバックが重要）
         
         raise HTTPException(status_code=500, detail="作品の登録に失敗しました")
+
+# 作品更新エンドポイント
+@router.put("/artworks/{artwork_id}")
+def update_artwork(artwork_id: int, artwork: ArtworkUpdate):
+    try:
+        c.execute("""
+            UPDATE artworks 
+            SET author = ?, title = ?, style = ?, notes = ?
+            WHERE id = ?
+        """, (artwork.author, artwork.title, artwork.style, artwork.notes, artwork_id))
+        
+        if c.rowcount == 0:
+            raise HTTPException(status_code=404, detail="作品が見つかりません")
+        
+        conn.commit()
+        
+        c.execute("SELECT * FROM artworks WHERE id = ?", (artwork_id,))
+        columns = [description[0] for description in c.description]
+        updated_artwork = dict(zip(columns, c.fetchone()))
+        
+        return {"message": "作品を更新しました", "artwork": updated_artwork}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"更新に失敗しました: {e}")
+
 
 # 作品削除エンドポイント
 @router.delete("/artworks/{artwork_id}")
