@@ -352,3 +352,48 @@ table tr:hover {
 .message-info {
     background-color: var(--color-text-muted);
 }
+
+/* 13. Image-based Quiz Choices */
+.image-choices {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.choice-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.choice-image:hover {
+    transform: scale(1.05);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.choice-image.disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.choice-image.disabled:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.choice-image.correct {
+    border-color: var(--color-success);
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.choice-image.incorrect {
+    border-color: var(--color-danger);
+    opacity: 0.5;
+}

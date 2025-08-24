@@ -152,14 +152,29 @@ function displayMultipleChoiceQuiz(data) {
     quizArea.appendChild(questionDiv);
 
     const choicesContainer = document.createElement('div');
-    choicesContainer.className = 'quiz-choices';
-    data.choices.forEach((choice, index) => {
-        const choiceButton = document.createElement('button');
-        choiceButton.className = 'choice-button';
-        choiceButton.textContent = `${String.fromCharCode(65 + index)}. ${escapeHtml(choice)}`;
-        choiceButton.onclick = () => selectAnswer(choice);
-        choicesContainer.appendChild(choiceButton);
-    });
+    
+    if (data.question_field === 'image') {
+        choicesContainer.className = 'quiz-choices image-choices';
+        data.choices.forEach(choice => {
+            const img = document.createElement('img');
+            img.src = `/uploads/thumbnails/thumb_${choice}`;
+            img.alt = '選択肢の画像';
+            img.className = 'choice-image';
+            // data-* 属性にファイル名を保存
+            img.dataset.filename = choice;
+            img.onclick = () => selectAnswer(choice);
+            choicesContainer.appendChild(img);
+        });
+    } else {
+        choicesContainer.className = 'quiz-choices';
+        data.choices.forEach((choice, index) => {
+            const choiceButton = document.createElement('button');
+            choiceButton.className = 'choice-button';
+            choiceButton.textContent = `${String.fromCharCode(65 + index)}. ${escapeHtml(choice)}`;
+            choiceButton.onclick = () => selectAnswer(choice);
+            choicesContainer.appendChild(choiceButton);
+        });
+    }
     quizArea.appendChild(choicesContainer);
 }
 
@@ -196,27 +211,27 @@ function displayQuizImage(artwork, container) {
     imageContainer.innerHTML = '<strong>画像:</strong> ';
     const imageToShow = artwork.image || artwork;
 
-    // image_filenameも参照する
     const filename = imageToShow.filename || imageToShow.image_filename;
-    if (imageToShow && imageToShow !== "???") {
-        if (filename) {
-            const img = document.createElement('img');
-            img.src = `/uploads/thumbnails/thumb_${filename}`;
-            img.alt = '作品画像';
-            img.className = 'quiz-image';
-            img.onclick = () => window.open(`/uploads/images/${filename}`, '_blank');
-            imageContainer.appendChild(img);
-        } else if (imageToShow.url && isValidUrl(imageToShow.url)) {
-            const link = document.createElement('a');
-            link.href = imageToShow.url;
-            link.target = '_blank';
-            link.textContent = '画像を見る';
-            imageContainer.appendChild(link);
-        } else {
-            imageContainer.appendChild(document.createTextNode('画像なし'));
-        }
-    } else {
+
+    // ファイル名が存在し、かつそれが「???」でないことを確認
+    if (filename && filename !== "???") {
+        const img = document.createElement('img');
+        img.src = `/uploads/thumbnails/thumb_${filename}`;
+        img.alt = '作品画像';
+        img.className = 'quiz-image';
+        img.onclick = () => window.open(`/uploads/images/${filename}`, '_blank');
+        imageContainer.appendChild(img);
+    } else if (filename === "???") {
+        // クイズで画像が隠されている場合
         imageContainer.appendChild(document.createTextNode('???'));
+    } else if (imageToShow.url && isValidUrl(imageToShow.url)) {
+        const link = document.createElement('a');
+        link.href = imageToShow.url;
+        link.target = '_blank';
+        link.textContent = '画像を見る';
+        imageContainer.appendChild(link);
+    } else {
+        imageContainer.appendChild(document.createTextNode('画像なし'));
     }
     container.appendChild(imageContainer);
 }
@@ -251,17 +266,31 @@ function setQuizMode(mode) {
 function selectAnswer(selectedChoice) {
     if (quizAnswered || !currentQuizData) return;
     quizAnswered = true;
-    const { correct_answer } = currentQuizData;
+    const { correct_answer, question_field } = currentQuizData;
     const isCorrect = selectedChoice === correct_answer;
 
-    document.querySelectorAll('.choice-button').forEach(button => {
-        button.classList.add('disabled');
-        if (button.textContent.includes(correct_answer)) {
-            button.classList.add('correct');
-        } else if (button.textContent.includes(selectedChoice) && !isCorrect) {
-            button.classList.add('incorrect');
-        }
-    });
+    if (question_field === 'image') {
+        document.querySelectorAll('.choice-image').forEach(img => {
+            img.classList.add('disabled');
+            // 正解の画像に correct クラスを付与
+            if (img.dataset.filename === correct_answer) {
+                img.classList.add('correct');
+            }
+            // 不正解で、かつ選択された画像だった場合に incorrect クラスを付与
+            else if (img.dataset.filename === selectedChoice) {
+                img.classList.add('incorrect');
+            }
+        });
+    } else {
+        document.querySelectorAll('.choice-button').forEach(button => {
+            button.classList.add('disabled');
+            if (button.textContent.includes(correct_answer)) {
+                button.classList.add('correct');
+            } else if (button.textContent.includes(selectedChoice) && !isCorrect) {
+                button.classList.add('incorrect');
+            }
+        });
+    }
 
     showQuizResult(isCorrect, selectedChoice);
     recordQuizResult(isCorrect, selectedChoice);
@@ -270,13 +299,19 @@ function selectAnswer(selectedChoice) {
 // クイズ結果表示 (4択)
 function showQuizResult(isCorrect, selectedChoice) {
     const resultDiv = document.createElement('div');
-    const { correct_answer, full_artwork_data } = currentQuizData;
+    const { correct_answer, full_artwork_data, question_field } = currentQuizData;
     resultDiv.className = `quiz-result ${isCorrect ? 'correct' : 'incorrect'}`;
 
     if (isCorrect) {
-        resultDiv.innerHTML = `<h3>🎉 正解です！</h3><p><strong>正答:</strong> ${escapeHtml(correct_answer)}</p>`;
+        resultDiv.innerHTML = `<h3>🎉 正解です！</h3>`;
+        if (question_field !== 'image') {
+            resultDiv.innerHTML += `<p><strong>正答:</strong> ${escapeHtml(correct_answer)}</p>`;
+        }
     } else {
-        resultDiv.innerHTML = `<h3>❌ 不正解</h3><p><strong>あなたの回答:</strong> ${escapeHtml(selectedChoice)}</p><p><strong>正解:</strong> ${escapeHtml(correct_answer)}</p>`;
+        resultDiv.innerHTML = `<h3>❌ 不正解</h3>`;
+        if (question_field !== 'image') {
+            resultDiv.innerHTML += `<p><strong>あなたの回答:</strong> ${escapeHtml(selectedChoice)}</p><p><strong>正解:</strong> ${escapeHtml(correct_answer)}</p>`;
+        }
     }
 
     if (isCorrect && full_artwork_data.notes) {
