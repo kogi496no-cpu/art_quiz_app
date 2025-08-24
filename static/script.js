@@ -26,6 +26,21 @@ function initializeEventListeners() {
         toggleBtn.addEventListener('click', toggleArtworksDisplay);
     }
 
+    // 検索フォーム
+    const searchForm = document.getElementById('search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const query = document.getElementById('search-input').value;
+            loadArtworks(query);
+        });
+
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', () => {
+            loadArtworks(searchInput.value);
+        });
+    }
+
     // 編集フォーム
     const editForm = document.getElementById('edit-form');
     if (editForm) {
@@ -379,17 +394,26 @@ function toggleArtworksDisplay() {
     const isHidden = artworksList.classList.toggle('hidden');
     toggleBtn.textContent = isHidden ? '作品一覧を表示' : '作品一覧を非表示';
     toggleBtn.className = isHidden ? 'btn btn-toggle' : 'btn btn-secondary';
-    if (!isHidden) loadArtworks();
+    if (!isHidden) {
+        const query = document.getElementById('search-input')?.value || '';
+        loadArtworks(query);
+    }
 }
 
 // 作品一覧読込
-async function loadArtworks() {
+async function loadArtworks(searchQuery = '') {
     try {
-        const res = await fetch('/artworks');
+        const url = new URL('/artworks', window.location.origin);
+        if (searchQuery) {
+            url.searchParams.append('q', searchQuery);
+        }
+        
+        const res = await fetch(url);
         const data = await res.json();
         const artworksArea = document.getElementById('artworks-list');
+        
         if (data.artworks.length === 0) {
-            artworksArea.innerHTML = '<p>登録された作品がありません。</p>';
+            artworksArea.innerHTML = '<p>該当する作品がありません。</p>';
             return;
         }
         const tableContainer = document.createElement('div');

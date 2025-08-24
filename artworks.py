@@ -84,15 +84,37 @@ async def artworks_page(request: Request):
     return templates.TemplateResponse("artworks.html", {"request": request})
 
 @router.get("/artworks")
-def get_artworks():
+def get_artworks(request: Request):
     try:
-        c.execute("SELECT id, author, title, style, image_url, image_filename, image_size, image_type, notes FROM artworks ORDER BY id DESC")
+        search_query = request.query_params.get('q', None)
+        
+        base_query = "SELECT id, author, title, style, image_filename, image_size, image_type, notes FROM artworks"
+        params = []
+        
+        if search_query:
+            # 全文検索（複数キーワード対応）
+            keywords = search_query.split()
+            where_clauses = []
+            for keyword in keywords:
+                # 各キーワードで各カラムを検索
+                keyword_param = f"%{keyword}%"
+                where_clauses.append("(author LIKE ? OR title LIKE ? OR style LIKE ? OR notes LIKE ?)")
+                params.extend([keyword_param] * 4)
+            
+            base_query += " WHERE " + " AND ".join(where_clauses)
+
+        base_query += " ORDER BY id DESC"
+        
+        c.execute(base_query, params)
+        
         rows = c.fetchall()
         columns = [description[0] for description in c.description]
         artworks = [dict(zip(columns, row)) for row in rows]
+        
         return {"artworks": artworks}
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail="データの取得に失敗しました")
+        raise HTTPException(status_code=500, detail=f"データの取得に失敗しました: {e}")
 
 # 画像アップロード対応の作品登録エンドポイント
 @router.post("/artworks/upload")
