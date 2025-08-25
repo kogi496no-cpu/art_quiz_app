@@ -333,7 +333,8 @@ function showQuizResult(isCorrect, selectedChoice) {
         }
     }
 
-    if (isCorrect && full_artwork_data.notes) {
+    // 正解・不正解に関わらず備考を表示
+    if (full_artwork_data.notes) {
         const notesP = document.createElement('p');
         notesP.innerHTML = `<strong>備考:</strong> ${escapeHtml(full_artwork_data.notes)}`;
         resultDiv.appendChild(notesP);
