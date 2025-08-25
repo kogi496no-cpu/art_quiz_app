@@ -109,11 +109,11 @@ class ArtworkUpdate(BaseModel):
             raise ValueError('備考が長すぎます（1000文字以内）')
         return cleaned.strip()
 
-@router.get("/artworks-page", response_class=HTMLResponse)
+@router.get("/artworks", response_class=HTMLResponse)
 async def artworks_page(request: Request):
     return templates.TemplateResponse("artworks.html", {"request": request})
 
-@router.get("/artworks")
+@router.get("/api/artworks")
 def get_artworks(request: Request):
     try:
         search_query = request.query_params.get('q', None)
@@ -147,7 +147,7 @@ def get_artworks(request: Request):
         raise HTTPException(status_code=500, detail=f"データの取得に失敗しました: {e}")
 
 # 画像アップロード対応の作品登録エンドポイント
-@router.post("/artworks/upload")
+@router.post("/api/artworks/upload")
 async def add_artwork_with_image(
     author: str = Form(...),
     title: str = Form(...),
@@ -211,7 +211,7 @@ async def add_artwork_with_image(
         raise HTTPException(status_code=500, detail="作品の登録に失敗しました")
 
 # 作品更新エンドポイント
-@router.put("/artworks/{artwork_id}")
+@router.put("/api/artworks/{artwork_id}")
 def update_artwork(artwork_id: int, artwork: ArtworkUpdate):
     try:
         c.execute("""
@@ -239,7 +239,7 @@ def update_artwork(artwork_id: int, artwork: ArtworkUpdate):
 
 
 # 作品削除エンドポイント
-@router.delete("/artworks/{artwork_id}")
+@router.delete("/api/artworks/{artwork_id}")
 def delete_artwork(artwork_id: int):
     try:
         # まず削除対象の作品情報を取得（画像ファイル削除のため）

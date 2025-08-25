@@ -26,7 +26,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
-async def read_index(request: Request):
+async def read_quiz(request: Request):
+    return templates.TemplateResponse("quiz.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+async def read_register(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
