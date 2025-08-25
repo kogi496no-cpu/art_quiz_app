@@ -406,40 +406,20 @@ function toggleArtworksDisplay() {
 
 // 作品一覧読込
 async function loadArtworks(searchQuery = '') {
-    console.log('loadArtworks called with query:', searchQuery);
     try {
         const url = new URL('/api/artworks', window.location.origin);
         if (searchQuery) {
             url.searchParams.append('q', searchQuery);
         }
         
-        console.log('Fetching from URL:', url.toString());
         const res = await fetch(url);
-        console.log('Fetch response status:', res.status);
-
-        if (!res.ok) {
-            console.error('Fetch failed with status:', res.status);
-            const errorText = await res.text();
-            console.error('Error response text:', errorText);
-            throw new Error(`サーバーエラー: ${res.status}`);
-        }
-
         const data = await res.json();
-        console.log('Received data:', data);
-
         const artworksArea = document.getElementById('artworks-list');
-        if (!artworksArea) {
-            console.error('#artworks-list element not found!');
-            return;
-        }
         
-        if (!data.artworks || data.artworks.length === 0) {
-            console.log('No artworks found. Displaying message.');
+        if (data.artworks.length === 0) {
             artworksArea.innerHTML = '<p>該当する作品がありません。</p>';
             return;
         }
-
-        console.log(`Found ${data.artworks.length} artworks. Starting to build table.`);
         const tableContainer = document.createElement('div');
         tableContainer.className = 'table-container';
         const table = document.createElement('table');
@@ -450,25 +430,12 @@ async function loadArtworks(searchQuery = '') {
             headerRow.appendChild(th);
         });
         table.appendChild(headerRow);
-
-        data.artworks.forEach((artwork, index) => {
-            console.log(`Processing artwork #${index}:`, artwork);
-            const row = createArtworkRow(artwork);
-            console.log(`Created row for artwork #${index}:`, row);
-            table.appendChild(row);
-        });
-
+        data.artworks.forEach(artwork => table.appendChild(createArtworkRow(artwork)));
         tableContainer.appendChild(table);
-        artworksArea.innerHTML = ''; // Clear previous content
+        artworksArea.innerHTML = '';
         artworksArea.appendChild(tableContainer);
-        console.log('Table built and appended successfully.');
-
     } catch (error) {
-        console.error('Error in loadArtworks:', error);
-        const artworksArea = document.getElementById('artworks-list');
-        if (artworksArea) {
-            artworksArea.innerHTML = '<p>データの取得に失敗しました。詳細はコンソールを確認してください。</p>';
-        }
+        document.getElementById('artworks-list').innerHTML = '<p>データの取得に失敗しました。</p>';
     }
 }
 
