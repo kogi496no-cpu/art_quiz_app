@@ -1,71 +1,31 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美術検定クイズ</title>
+  <title>美術検定クイズ - ジャンル選択</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div class="app-container text-center">
+    <h1>美術検定クイズ</h1>
+    <p>挑戦したいジャンルを選んでください。</p>
 
-  <div class="app-container">
-    <h1 class="text-center">作品登録</h1>
-    
-    <!-- 作品登録セクション -->
-    <section>
-      <h2>作品登録</h2>
-      <form id="art-form-upload" enctype="multipart/form-data">
-        <label for="upload-author">作者:</label>
-        <input type="text" id="upload-author" name="author" required>
-
-        <label for="upload-title">作品名:</label>
-        <input type="text" id="upload-title" name="title" required>
-
-        <label for="upload-style">美術様式:</label>
-        <input type="text" id="upload-style" name="style" required>
-
-        <label for="upload-notes">備考:</label>
-        <textarea id="upload-notes" name="notes" rows="3"></textarea>
-
-        <label for="upload-image">画像ファイル:</label>
-        <input type="file" id="upload-image" name="image" accept="image/*">
-        <small>JPEG, PNG, WebP, GIF対応（最大5MB）</small>
-
-        <button type="submit" class="btn">保存</button>
-      </form>
-    </section>
-
-    <!-- クイズ・作品管理ページへの遷移ボタンのみ表示 -->
-    <div class="text-center mt-3">
-      <a href="/" class="btn mb-3">トップページへ</a>
-      <a href="/artworks" class="btn">作品管理ページへ</a>
+    <div class="genre-selection">
+      <div class="genre-card">
+        <h2>西洋美術</h2>
+        <p>ルネサンスから近代美術まで、西洋の偉大な作品に関するクイズです。</p>
+        <a href="/quiz/western" class="btn">クイズに挑戦</a>
+        <a href="/artworks/western" class="btn btn-secondary">作品を管理</a>
+      </div>
+      <div class="genre-card">
+        <h2>日本美術</h2>
+        <p>浮世絵、琳派、水墨画など、日本の美しい作品に関するクイズです。</p>
+        <a href="/quiz/japanese" class="btn">クイズに挑戦</a>
+        <a href="/artworks/japanese" class="btn btn-secondary">作品を管理</a>
+      </div>
     </div>
   </div>
-
-  <!-- Edit Modal -->
-  <div id="edit-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="closeEditModal()">&times;</span>
-      <h2>作品編集</h2>
-      <form id="edit-form">
-        <input type="hidden" id="edit-artwork-id">
-        <label for="edit-author">作者:</label>
-        <input type="text" id="edit-author" name="author" required>
-
-        <label for="edit-title">作品名:</label>
-        <input type="text" id="edit-title" name="title" required>
-
-        <label for="edit-style">美術様式:</label>
-        <input type="text" id="edit-style" name="style" required>
-
-        <label for="edit-notes">備考:</label>
-        <textarea id="edit-notes" name="notes" rows="4"></textarea>
-
-        <button type="submit" class="btn">更新</button>
-      </form>
-    </div>
-  </div>
-
-  <script src="/static/script.js"></script>
 </body>
 </html>

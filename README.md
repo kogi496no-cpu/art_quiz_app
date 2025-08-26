@@ -1,131 +1,120 @@
-# Art Quiz App
 
-美術作品に関するクイズを提供するウェブアプリケーションです。トップページでクイズに挑戦でき、作品の登録・管理も可能です。
+# Art Quiz App (西洋美術 & 日本美術)
 
-## 機能
+西洋美術と日本美術、二つのジャンルに対応したアートクイズを提供するウェブアプリケーションです。
+トップページから挑戦したいジャンルを選択し、クイズを楽しんだり、作品データを管理したりすることができます。
 
-### 作品管理機能
-- 作品の登録（画像アップロード対応）
-- 登録済み作品の一覧表示、検索
-- 作品情報の編集
-- 作品の削除
+## 主な機能
 
-### クイズ機能
-- 穴埋めクイズ（作者名、作品名、様式、画像から1つを隠して出題）
-- 4択クイズ（作者名、作品名、様式、画像から選択式で出題）
-- クイズ結果の記録
-- 統計情報の表示（正答率、分野別成績など）
-
-## ページ構成
-
-- **トップページ (`/`)**: メインのクイズページです。
-- **作品登録ページ (`/register`)**: 新しい美術作品をデータベースに登録します。
-- **作品管理ページ (`/artworks`)**: 登録済みの作品を一覧で確認、編集、削除できます。
+- **ジャンル選択**: トップページで「西洋美術」「日本美術」のどちらかを選択。
+- **クイズ機能**: 作品の画像や情報に関する4択クイズ。
+- **作品管理**: 作品データの登録、一覧表示、検索、編集、削除。
+- **画像アップロード**: 作品画像の登録に対応。
+- **データ分離**: ジャンルごとにデータベースと画像フォルダを分離して管理。
 
 ## 技術スタック
 
-- Backend: FastAPI (Python)
-- Database: SQLite3
-- Frontend: HTML, JavaScript, CSS
-- 画像処理: Pillow (Python Imaging Library)
+- **Backend**: FastAPI (Python)
+- **Database**: SQLite
+- **Frontend**: HTML, CSS, JavaScript (Vanilla JS)
+- **Image Processing**: Pillow
 
 ## プロジェクト構成
 
 ```
 art_quiz_app/
 │
-├── main.py           # アプリケーションのエントリーポイント
-├── artworks.py       # 作品関連の機能を管理
-├── quiz.py          # クイズ関連の機能を管理
-├── art.db           # SQLiteデータベース
+├── main.py           # FastAPIアプリケーションのエントリーポイント
+├── artworks.py       # 作品管理APIのルーター
+├── quiz.py           # クイズAPIのルーター
+├── database.py       # DB接続の管理
 │
-├── static/          # 静的ファイル
-│   ├── script.js    # フロントエンドのJavaScript
-│   └── style.css    # スタイルシート
+├── art.db            # 西洋美術のデータベース
+├── japanese_art.db   # 日本美術のデータベース
 │
-├── templates/       # HTMLテンプレート
-│   ├── artworks.html  # 作品管理ページ
-│   ├── index.html    # 作品登録ページ
-│   └── quiz.html     # トップページ（クイズページ）
+├── static/           # 静的ファイル
+│   ├── script.js     # フロントエンドのJavaScript
+│   └── style.css     # スタイルシート
 │
-└── uploads/         # アップロードされたファイル
-    ├── images/      # オリジナル画像
-    └── thumbnails/  # サムネイル画像
+├── templates/        # HTMLテンプレート
+│   ├── index.html    # トップページ（ジャンル選択）
+│   ├── artworks.html # 作品管理ページ
+│   └── quiz.html     # クイズページ
+│
+└── uploads/          # アップロードされた画像
+    ├── images/       # 西洋美術のオリジナル画像
+    ├── thumbnails/   # 西洋美術のサムネイル
+    ├── japanese_images/      # 日本美術のオリジナル画像
+    └── japanese_thumbnails/  # 日本美術のサムネイル
 ```
 
-## セットアップ
+## セットアップと実行
 
-1. 必要なパッケージのインストール:
-```bash
-pip install -r requirements.txt
-```
+1.  **必要なライブラリをインストールします。**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-2. アプリケーションの起動:
-```bash
-python -m uvicorn main:app --reload
-```
+2.  **FastAPIアプリケーションを起動します。**
+    ```bash
+    uvicorn main:app --reload
+    ```
 
-3. ブラウザでアクセス:
-```
-http://localhost:8000
-```
+3.  **ブラウザでアクセスします。**
+    [http://localhost:8000](http://localhost:8000)
 
-## API エンドポイント
+## 使い方
 
-### 作品関連 (API)
-- GET `/api/artworks` - 作品一覧の取得
-- POST `/api/artworks/upload` - 新規作品の登録
-- PUT `/api/artworks/{artwork_id}` - 作品情報の更新
-- DELETE `/api/artworks/{artwork_id}` - 作品の削除
+1.  **トップページ**にアクセスすると、ジャンル選択画面が表示されます。
+2.  「クイズに挑戦」ボタンをクリックすると、各ジャンルの**クイズページ** (`/quiz/{genre}`) に移動します。
+3.  「作品を管理」ボタンをクリックすると、各ジャンルの**作品管理ページ** (`/artworks/{genre}`) に移動し、作品の登録や編集ができます。
 
-### クイズ関連 (API)
-- GET `/quiz` - 穴埋めクイズの取得
-- GET `/quiz/multiple-choice` - 4択クイズの取得
-- POST `/quiz/submit` - クイズ結果の送信
-- GET `/quiz/stats` - 統計情報の取得
-- POST `/quiz/reset` - 統計情報のリセット
+## APIエンドポイント
+
+APIはジャンル指定のプレフィックス (`/api/{genre}`) を持ちます。
+`{genre}` には `western` または `japanese` が入ります。
+
+### 作品関連 (Artworks)
+- `GET /api/{genre}/artworks`: 作品一覧の取得
+- `POST /api/{genre}/artworks/upload`: 新規作品の登録
+- `PUT /api/{genre}/artworks/{artwork_id}`: 作品情報の更新
+- `DELETE /api/{genre}/artworks/{artwork_id}`: 作品の削除
+
+### クイズ関連 (Quiz)
+- `GET /api/{genre}/quiz/multiple-choice`: 4択クイズの取得
+- `POST /api/{genre}/quiz/submit`: クイズ結果の送信
+- `GET /api/{genre}/quiz/stats`: 統計情報の取得
+- `POST /api/{genre}/quiz/reset`: 統計情報のリセット
 
 ## データベース構造
 
-### artworks テーブル
+`art.db` と `japanese_art.db` は同じテーブル構造を持っています。
+
+### `artworks` テーブル
 ```sql
-CREATE TABLE artworks (
-    id INTEGER PRIMARY KEY,
-    author TEXT,
-    title TEXT,
-    style TEXT,
-    image_url TEXT,
-    image_filename TEXT,
-    image_size INTEGER,
-    image_type TEXT,
-    notes TEXT
+CREATE TABLE "artworks" (
+    "id" INTEGER,
+    "author" TEXT,
+    "title" TEXT,
+    "style" TEXT,
+    "image_url" TEXT,
+    "image_filename" TEXT,
+    "image_size" INTEGER,
+    "image_type" TEXT,
+    "notes" TEXT,
+    PRIMARY KEY ("id")
 )
 ```
 
-### quiz_results テーブル
+### `quiz_results` テーブル
 ```sql
-CREATE TABLE quiz_results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    question_field TEXT,
-    correct_answer TEXT,
-    user_answer TEXT,
-    is_correct BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "quiz_results" (
+    "id" INTEGER,
+    "question_field" TEXT,
+    "correct_answer" TEXT,
+    "user_answer" TEXT,
+    "is_correct" BOOLEAN,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("id" AUTOINCREMENT)
 )
 ```
-
-## 開発ガイドライン
-
-### 新機能の追加
-1. 作品関連の機能は `artworks.py` に追加
-2. クイズ関連の機能は `quiz.py` に追加
-3. 共通設定は `main.py` で管理
-
-### コード規約
-- PEP 8スタイルガイドに従う
-- 各機能は適切なモジュールに分割
-- エラーハンドリングを適切に実装
-
-## ライセンス
-
-This project is licensed under the MIT License - see the LICENSE file for details
