@@ -3,21 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>作品管理</title>
+  <title>作品管理 - {{ genre.capitalize() }}</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body data-genre="{{ genre }}">
   <div class="app-container">
-    <h1 class="text-center">作品管理ページ</h1>
-    <div class="search-container mb-3">
-      <form id="search-form">
-        <input type="search" id="search-input" placeholder="作品名、作者、様式などで検索..." class="form-control">
-        <button type="submit" class="btn">検索</button>
-      </form>
+    <h1 class="text-center">作品管理 ({{ '西洋美術' if genre == 'western' else '日本美術' }})</h1>
+    <div class="navigation-links">
+        <a href="/" class="btn">トップページへ戻る</a>
+        <a href="/quiz/{{ genre }}" class="btn">クイズページへ</a>
     </div>
-    <button onclick="window.location.href='/'" class="btn mb-3">トップページへ戻る</button>
-    <button onclick="window.location.href='/register'" class="btn mb-3">作品登録ページへ</button>
-    <div id="artworks-list"></div>
+
+    <!-- 作品登録セクション -->
+    <section class="mb-3 form-section">
+      <h2>新しい作品を登録</h2>
+      <form id="art-form-upload" enctype="multipart/form-data">
+        <label for="upload-author">作者:</label>
+        <input type="text" id="upload-author" name="author" required>
+
+        <label for="upload-title">作品名:</label>
+        <input type="text" id="upload-title" name="title" required>
+
+        <label for="upload-style">美術様式:</label>
+        <input type="text" id="upload-style" name="style" required>
+
+        <label for="upload-notes">備考:</label>
+        <textarea id="upload-notes" name="notes" rows="3"></textarea>
+
+        <label for="upload-image">画像ファイル:</label>
+        <input type="file" id="upload-image" name="image" accept="image/*">
+        <small>JPEG, PNG, WebP, GIF対応（最大5MB）</small>
+
+        <button type="submit" class="btn">登録</button>
+      </form>
+    </section>
+
+    <hr>
+
+    <!-- 作品一覧セクション -->
+    <section>
+        <h2>登録済み作品一覧</h2>
+        <div class="search-container mb-3">
+          <form id="search-form" onsubmit="event.preventDefault();">
+            <input type="search" id="search-input" placeholder="作品名、作者、様式などで検索..." class="form-control">
+          </form>
+        </div>
+        <div id="artworks-list"></div>
+    </section>
   </div>
 
   <!-- Edit Modal -->
@@ -29,26 +61,17 @@
         <input type="hidden" id="edit-artwork-id">
         <label for="edit-author">作者:</label>
         <input type="text" id="edit-author" name="author" required>
-
         <label for="edit-title">作品名:</label>
         <input type="text" id="edit-title" name="title" required>
-
         <label for="edit-style">美術様式:</label>
         <input type="text" id="edit-style" name="style" required>
-
         <label for="edit-notes">備考:</label>
         <textarea id="edit-notes" name="notes" rows="4"></textarea>
-
         <button type="submit" class="btn">更新</button>
       </form>
     </div>
   </div>
 
   <script src="/static/script.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      loadArtworks();
-    });
-  </script>
 </body>
 </html>
