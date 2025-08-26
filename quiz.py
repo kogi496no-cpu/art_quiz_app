@@ -3,6 +3,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import random
 import sqlite3
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 router = APIRouter()
 
@@ -11,6 +14,55 @@ conn = sqlite3.connect("art.db", check_same_thread=False)
 c = conn.cursor()
 
 templates = Jinja2Templates(directory="templates")
+
+def get_similar_choices(all_artworks, correct_artwork, field, num_choices=3):
+    """
+    コサイン類似度に基づいて、類似した選択肢を取得する
+    """
+    # 'notes'フィールドをコーパスとして使用
+    corpus = [artwork.get('notes', '') or '' for artwork in all_artworks]
+    
+    # TF-IDFベクトル化
+    try:
+        vectorizer = TfidfVectorizer()
+        tfidf_matrix = vectorizer.fit_transform(corpus)
+    except ValueError:
+        # コーパスが空、またはすべてストップワードの場合
+        return []
+
+    # 正解の作品のインデックスを探す
+    correct_index = -1
+    for i, artwork in enumerate(all_artworks):
+        if artwork['id'] == correct_artwork['id']:
+            correct_index = i
+            break
+    
+    if correct_index == -1:
+        return []
+
+    # コサイン類似度を計算
+    cosine_sim = cosine_similarity(tfidf_matrix[correct_index], tfidf_matrix).flatten()
+    
+    # 類似度が高い順にインデックスをソート（自分自身は除く）
+    # argsort()は昇順でインデックスを返すので、[::-1]で降順にする
+    similar_indices = cosine_sim.argsort()[::-1]
+    
+    # 選択肢を収集
+    choices = []
+    correct_answer_value = correct_artwork[field]
+    
+    for idx in similar_indices:
+        # 自分自身と、すでに選択肢にある値、正解と同じ値は除外
+        if idx != correct_index:
+            artwork = all_artworks[idx]
+            choice_value = artwork[field]
+            if choice_value and choice_value != correct_answer_value and choice_value not in choices:
+                choices.append(choice_value)
+        
+        if len(choices) >= num_choices:
+            break
+            
+    return choices
 
 @router.post("/quiz/submit")
 def submit_quiz_result(result: dict):
@@ -106,18 +158,15 @@ def get_quiz():
 
 @router.get("/quiz/multiple-choice")
 def get_multiple_choice_quiz():
-    # 画像付きの作品が4つ以上あるかチェック
     c.execute("SELECT COUNT(*) FROM artworks WHERE image_filename IS NOT NULL")
     image_artwork_count = c.fetchone()[0]
     
-    # 通常のクイズ(author, title, style)も考慮
     c.execute("SELECT COUNT(*) FROM artworks")
     total_artwork_count = c.fetchone()[0]
 
     if total_artwork_count < 4:
         raise HTTPException(status_code=404, detail="4択クイズには最低4件のデータが必要です")
 
-    # クイズのタイプを決定
     possible_fields = ["author", "title", "style"]
     if image_artwork_count >= 4:
         possible_fields.append("image")
@@ -126,10 +175,8 @@ def get_multiple_choice_quiz():
 
     # 正解の作品を選ぶ
     if question_field == "image":
-        # 画像クイズの場合は、画像がある作品から正解を選ぶ
         c.execute("SELECT * FROM artworks WHERE image_filename IS NOT NULL ORDER BY RANDOM() LIMIT 1")
     else:
-        # それ以外は全ての作品からランダムに選ぶ
         c.execute("SELECT * FROM artworks ORDER BY RANDOM() LIMIT 1")
     
     correct_row_tuple = c.fetchone()
@@ -146,14 +193,11 @@ def get_multiple_choice_quiz():
 
     if question_field == "image":
         correct_answer = correct_row["image_filename"]
-        
-        # ダミーの画像を選択
         c.execute("""
             SELECT image_filename FROM artworks 
             WHERE image_filename IS NOT NULL AND id != ? 
             ORDER BY RANDOM() LIMIT 3
         """, (correct_row["id"],))
-        
         dummy_answers = [row[0] for row in c.fetchall()]
         
         if len(dummy_answers) < 3:
@@ -162,42 +206,57 @@ def get_multiple_choice_quiz():
         choices = [correct_answer] + dummy_answers
         random.shuffle(choices)
         
-        # 問題データでは画像情報を隠す
         quiz_artwork_data["image_filename"] = "???"
-        quiz_artwork_data["image_url"] = None # URLがある場合も隠す
+        quiz_artwork_data["image_url"] = None
         question_text = "この作品の画像はどれ？"
 
     else: # author, title, style の場合
         correct_answer = correct_row[question_field]
         
-        # ダミーの選択肢を取得
-        dummy_query = f"""
-        SELECT DISTINCT {question_field} FROM artworks 
-        WHERE {question_field} != ? AND {question_field} IS NOT NULL AND {question_field} != ''
-        ORDER BY RANDOM() LIMIT 3
-        """
-        c.execute(dummy_query, (correct_answer,))
-        dummy_answers = [row[0] for row in c.fetchall()]
+        # --- コサイン類似度で選択肢を取得 ---
+        c.execute("SELECT * FROM artworks")
+        all_artworks_tuples = c.fetchall()
+        all_artworks = [dict(zip(columns, row)) for row in all_artworks_tuples]
         
-        # フォールバックの選択肢
-        fallback_options = {
-            "author": ["レオナルド・ダ・ヴィンチ", "ミケランジェロ", "ラファエロ", "ピカソ", "モネ", "ゴッホ"],
-            "title": ["モナリザ", "最後の晩餐", "星月夜", "ひまわり", "叫び", "真珠の耳飾りの少女"],
-            "style": ["ルネサンス", "バロック", "印象派", "キュビスム", "シュルレアリスム", "抽象表現主義"]
-        }
+        dummy_answers = get_similar_choices(all_artworks, correct_row, question_field)
+
+        # --- 類似選択肢が足りない場合のフォールバック ---
+        if len(dummy_answers) < 3:
+            # 既存のランダム選択ロジックをフォールバックとして使用
+            fallback_query = f"""
+            SELECT DISTINCT {question_field} FROM artworks 
+            WHERE {question_field} != ? AND {question_field} IS NOT NULL AND {question_field} != ''
+            ORDER BY RANDOM()
+            """
+            c.execute(fallback_query, (correct_answer,))
+            
+            fallback_candidates = [row[0] for row in c.fetchall()]
+            for candidate in fallback_candidates:
+                if candidate not in dummy_answers:
+                    dummy_answers.append(candidate)
+                if len(dummy_answers) >= 3:
+                    break
+
+        # --- それでも足りない場合の最終フォールバック ---
+        if len(dummy_answers) < 3:
+            fallback_options = {
+                "author": ["レオナルド・ダ・ヴィンチ", "ミケランジェロ", "ラファエロ", "ピカソ", "モネ", "ゴッホ"],
+                "title": ["モナリザ", "最後の晩餐", "星月夜", "ひまわり", "叫び", "真珠の耳飾りの少女"],
+                "style": ["ルネサンス", "バロック", "印象派", "キュビスム", "シュルレアリスム", "抽象表現主義"]
+            }
+            all_fallbacks = [opt for opt in fallback_options[question_field] if opt != correct_answer and opt not in dummy_answers]
+            while len(dummy_answers) < 3 and all_fallbacks:
+                chosen = random.choice(all_fallbacks)
+                dummy_answers.append(chosen)
+                all_fallbacks.remove(chosen)
         
-        all_fallbacks = [opt for opt in fallback_options[question_field] if opt != correct_answer and opt not in dummy_answers]
-        while len(dummy_answers) < 3 and all_fallbacks:
-            chosen = random.choice(all_fallbacks)
-            dummy_answers.append(chosen)
-            all_fallbacks.remove(chosen)
-        
+        # 最終手段
         i = 1
         while len(dummy_answers) < 3:
             dummy_answers.append(f"ダミー選択肢{i}")
             i += 1
-            
-        choices = [correct_answer] + dummy_answers
+
+        choices = [correct_answer] + dummy_answers[:3] # 必ず3つのダミー選択肢に
         random.shuffle(choices)
         
         quiz_artwork_data[question_field] = "???"
