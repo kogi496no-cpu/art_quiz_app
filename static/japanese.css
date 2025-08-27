@@ -1,0 +1,32 @@
+
+body.japanese {
+  background-color: #f5f5dc; /* ベージュ */
+  color: #333;
+}
+
+.japanese .btn {
+  background-color: #228b22; /* フォレストグリーン */
+  color: #fff;
+}
+
+.japanese .btn:hover {
+  background-color: #2e9b2e;
+}
+
+.japanese .btn-secondary {
+  background-color: #556b2f; /* ダークオリーブグリーン */
+  color: #fff;
+}
+
+.japanese .btn-secondary:hover {
+  background-color: #6b8e23;
+}
+
+.japanese .genre-card {
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.japanese h1, .japanese h2 {
+    color: #333;
+}

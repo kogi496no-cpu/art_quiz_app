@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>作品管理 - {{ genre.capitalize() }}</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/western.css">
+  <link rel="stylesheet" href="/static/japanese.css">
 </head>
-<body data-genre="{{ genre }}">
+<body class="{{ genre }}" data-genre="{{ genre }}">
   <div class="app-container">
     <h1 class="text-center">作品管理 ({{ '西洋美術' if genre == 'western' else '日本美術' }})</h1>
     <div class="navigation-links">
