@@ -1,32 +1,223 @@
+/* 美術検定クイズアプリ - 和風テーマ (改: 赤金) */
 
+/* 1. フォント設定 */
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+/* 2. CSS変数 (カラーパレット) */
+:root {
+    --font-primary: 'Shippori Mincho', serif;
+
+    --color-red-primary: #b74545; /* 主調色 (蘇芳色) */
+    --color-red-dark: #9f3a3a;
+    --color-gold-accent: #c8a456; /* アクセント (金色) */
+    --color-background: #fdfaf4; /* 背景 (生成り色) */
+    --color-surface: #ffffff;
+    --color-text: #343434; /* 文字 (墨色) */
+    --color-text-light: #ffffff;
+    --color-border: #dcdcdc;
+    --color-success: #5a8a5a; /* 成功 (緑青) */
+    --color-danger: #b74545;  /* 失敗 (主調色と同じ) */
+
+    --border-radius: 4px;
+}
+
+/* 3. 基本・レイアウトスタイル */
 body.japanese {
-  background-color: #f5f5dc; /* ベージュ */
-  color: #333;
+    margin: 0;
+    font-family: var(--font-primary);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.7;
+    font-weight: 400;
 }
 
-.japanese .btn {
-  background-color: #228b22; /* フォレストグリーン */
-  color: #fff;
+.app-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 中央揃え */
+    gap: 1.5rem;
 }
 
-.japanese .btn:hover {
-  background-color: #2e9b2e;
+h1.text-center {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--color-red-primary);
+    border-bottom: 2px solid var(--color-gold-accent);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-.japanese .btn-secondary {
-  background-color: #556b2f; /* ダークオリーブグリーン */
-  color: #fff;
+.navigation-links {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: center; /* 中央揃え */
 }
 
-.japanese .btn-secondary:hover {
-  background-color: #6b8e23;
+section {
+    width: 100%;
+    background-color: var(--color-surface);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+    box-sizing: border-box;
 }
 
-.japanese .genre-card {
-    border: 1px solid #ccc;
-    background-color: #fff;
+section h2 {
+    text-align: center; /* 中央揃え */
+    font-size: 1.8em;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-top: 0;
+    margin-bottom: 2rem;
 }
 
-.japanese h1, .japanese h2 {
-    color: #333;
+/* 5. ボタン */
+.btn {
+    display: inline-block;
+    background-color: var(--color-red-primary);
+    color: var(--color-text-light);
+    padding: 0.7rem 2rem;
+    border: 1px solid var(--color-red-dark);
+    border-radius: var(--border-radius);
+    font-size: 1em;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--color-red-dark);
+    border-color: var(--color-red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-secondary {
+    background-color: #7f8c8d;
+    border-color: #707c7d;
+}
+.btn-secondary:hover {
+    background-color: #6c7a7b;
+    border-color: #5a6566;
+}
+
+.btn-danger {
+    background-color: #585858;
+    border-color: #4d4d4d
+}
+.btn-danger:hover {
+    background-color: #4d4d4d;
+    border-color: #404040;
+}
+
+/* 6. クイズ選択肢 */
+.quiz-choices {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.choice-button {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.05em;
+    font-family: var(--font-primary);
+    color: var(--color-text);
+}
+
+.choice-button:hover {
+    border-color: var(--color-gold-accent);
+    background-color: #fffdf7;
+}
+
+.choice-button.correct, .choice-button.correct:hover {
+    background: #eaf3ea;
+    border-color: var(--color-success);
+    color: #3b6b3b;
+    font-weight: 600;
+}
+
+.choice-button.incorrect, .choice-button.incorrect:hover {
+    background: #f8e2e2;
+    border-color: var(--color-danger);
+    color: #721C24;
+}
+
+.choice-button.disabled, .choice-button.disabled:hover {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background-color: #f5f5f5;
+    border-color: var(--color-border);
+}
+
+/* 7. その他 */
+.hidden { display: none !important; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mt-3 { margin-top: 1.5rem; }
+
+.quiz-result {
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.quiz-result.correct {
+    background-color: #eaf3ea;
+    border: 1px solid var(--color-success);
+}
+
+.quiz-result.incorrect {
+    background-color: #f8e2e2;
+    border: 1px solid var(--color-danger);
+}
+
+.image-choices {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.choice-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 3px solid var(--color-border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.choice-image:hover {
+    border-color: var(--color-gold-accent);
+}
+
+.choice-image.correct {
+    border-color: var(--color-success) !important;
+}
+
+.choice-image.incorrect {
+    border-color: var(--color-danger) !important;
+    opacity: 0.6;
+}
+
+.choice-image.disabled, .choice-image.disabled:hover {
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-color: var(--color-border);
 }

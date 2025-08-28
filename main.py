@@ -30,7 +30,11 @@ async def read_quiz(request: Request, genre: str):
     """ジャンル別のクイズページ"""
     if genre not in ["western", "japanese"]:
         return RedirectResponse(url="/")
-    return templates.TemplateResponse("quiz.html", {"request": request, "genre": genre})
+    
+    # ジャンルに応じたCSSファイルを決定
+    css_file = f"{genre}.css"
+    
+    return templates.TemplateResponse("quiz.html", {"request": request, "genre": genre, "css_file": css_file})
 
 @app.get("/artworks/{genre}", response_class=HTMLResponse)
 async def read_artworks(request: Request, genre: str):
