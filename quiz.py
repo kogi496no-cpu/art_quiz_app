@@ -21,7 +21,7 @@ class QuizResult(BaseModel):
     is_correct: bool
 
 def get_similar_choices(all_artworks: List[dict], correct_artwork: dict, field: str, num_choices=3) -> List[str]:
-    corpus = [artwork.get('notes', '') or '' for artwork in all_artworks]
+    corpus = [f"{artwork.get('author', '')} {artwork.get('title', '')} {artwork.get('style', '')}" for artwork in all_artworks]
     try:
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(corpus)
