@@ -403,12 +403,16 @@ function toggleStats() {
     statsContent.classList.toggle('hidden');
     const btn = statsContent.previousElementSibling;
     if (btn) btn.textContent = statsContent.classList.contains('hidden') ? '統計を表示' : '統計を非表示';
+
+    if (!statsContent.classList.contains('hidden')) {
+        loadStats();
+    }
 }
 
 // 統計読込
 async function loadStats() {
     const statsContent = document.getElementById('stats-content');
-    if (!statsContent || statsContent.classList.contains('hidden')) return;
+    if (!statsContent) return;
     try {
         const res = await fetch(`/api/${currentGenre}/quiz/stats`);
         const stats = await res.json();
