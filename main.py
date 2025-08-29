@@ -41,4 +41,8 @@ async def read_artworks(request: Request, genre: str):
     """ジャンル別の作品管理ページ"""
     if genre not in ["western", "japanese"]:
         return RedirectResponse(url="/")
-    return templates.TemplateResponse("artworks.html", {"request": request, "genre": genre})
+    
+    # ジャンルに応じたCSSファイルを決定
+    css_file = f"{genre}.css"
+    
+    return templates.TemplateResponse("artworks.html", {"request": request, "genre": genre, "css_file": css_file})

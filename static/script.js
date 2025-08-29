@@ -1,5 +1,5 @@
 // グローバル変数
-let currentQuizMode = 'multiple';
+
 let currentQuizData = null;
 let quizAnswered = false;
 let currentGenre = ''; // ジャンルを保持するグローバル変数
@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // クイズページでのみ実行
     if (document.getElementById('quiz-area')) {
-        setQuizMode('multiple');
         loadStats();
     }
     // 作品管理ページでのみ実行
@@ -251,18 +250,7 @@ async function handleEditSubmit(e) {
 
 // --- クイズ機能 (quiz.html) ---
 
-// クイズモード切替
-function setQuizMode(mode) {
-    currentQuizMode = mode;
-    const simpleBtn = document.getElementById('simple-mode-btn');
-    const multipleBtn = document.getElementById('multiple-mode-btn');
-    if(simpleBtn && multipleBtn) {
-        simpleBtn.className = mode === 'simple' ? 'btn btn-primary' : 'btn btn-secondary';
-        multipleBtn.className = mode === 'multiple' ? 'btn btn-primary' : 'btn btn-secondary';
-        document.getElementById('quiz-area').innerHTML = '';
-        document.getElementById('stats-area').classList.toggle('hidden', mode !== 'multiple');
-    }
-}
+
 
 // クイズ読込
 async function loadQuiz() {
@@ -383,7 +371,7 @@ function showQuizResult(isCorrect, selectedChoice) {
     resultDiv.className = `quiz-result ${isCorrect ? 'correct' : 'incorrect'}`;
 
     if (isCorrect) {
-        resultDiv.innerHTML = `<h3>🎉 正解です！</h3>`;
+        resultDiv.innerHTML = `<h3>正解です！</h3>`;
     } else {
         resultDiv.innerHTML = `<h3>❌ 不正解</h3><p><strong>正解:</strong> ${escapeHtml(correct_answer)}</p>`;
     }
