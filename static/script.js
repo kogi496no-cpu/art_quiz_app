@@ -18,7 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // 作品管理ページでのみ実行
     if (document.getElementById('artworks-list')) {
-        loadArtworks();
+        // ボタンクリックで作品を読み込むように変更
+        const loadBtn = document.getElementById('load-artworks-btn');
+        if (loadBtn) {
+            loadBtn.addEventListener('click', () => {
+                loadArtworks();
+                loadBtn.style.display = 'none'; // ボタンを非表示にする
+            });
+        }
     }
 });
 
@@ -90,7 +97,9 @@ async function handleUploadSubmit(e) {
 // 作品一覧読込
 async function loadArtworks(searchQuery = '') {
     const artworksArea = document.getElementById('artworks-list');
+    const artworkCountSpan = document.getElementById('artwork-count');
     if (!artworksArea) return;
+
     try {
         const url = new URL(`/api/${currentGenre}/artworks`, window.location.origin);
         if (searchQuery) {
@@ -99,9 +108,19 @@ async function loadArtworks(searchQuery = '') {
         
         const res = await fetch(url);
         const data = await res.json();
+
+        // 検索クエリがない場合のみ作品数を更新
+        if (searchQuery === '' && artworkCountSpan) {
+            artworkCountSpan.textContent = data.artworks.length;
+        }
         
         if (data.artworks.length === 0) {
-            artworksArea.innerHTML = '<p>該当する作品がありません。</p>';
+            // 検索結果が0件の場合と初期状態で0件の場合でメッセージを分ける
+            if (searchQuery !== '') {
+                artworksArea.innerHTML = '<p>該当する作品がありません。</p>';
+            } else {
+                artworksArea.innerHTML = '<p>登録されている作品はありません。</p>';
+            }
             return;
         }
         const tableContainer = document.createElement('div');
