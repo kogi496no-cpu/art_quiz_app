@@ -1,3 +1,5 @@
+import secrets
+from starlette.middleware.sessions import SessionMiddleware
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,6 +11,11 @@ from artworks import router as artworks_router
 from quiz import router as quiz_router
 
 app = FastAPI()
+
+# セッションミドルウェアの設定
+# 本番環境では、このSECRET_KEYを環境変数などから取得するようにしてください
+SECRET_KEY = secrets.token_hex(32)
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # 静的ファイル配信の設定
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
