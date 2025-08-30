@@ -18,25 +18,43 @@
     <section class="mb-3 form-section">
       <h2>新しい作品を登録</h2>
       <form id="art-form-upload" enctype="multipart/form-data">
-        <label for="upload-author">作者:</label>
-        <input type="text" id="upload-author" name="author" required>
+        <div class="input-group">
+          <label for="upload-author">作者:</label>
+          <input type="text" id="upload-author" name="author" required>
+        </div>
 
-        <label for="upload-title">作品名:</label>
-        <input type="text" id="upload-title" name="title" required>
+        <div class="input-group">
+          <label for="upload-title">作品名:</label>
+          <input type="text" id="upload-title" name="title" required>
+        </div>
 
-        <label for="upload-style">美術様式:</label>
-        <input type="text" id="upload-style" name="style" required>
+        <div class="input-group">
+          <label for="upload-style">美術様式:</label>
+          <input type="text" id="upload-style" name="style" required>
+        </div>
 
-        <label for="upload-notes">備考:</label>
-        <textarea id="upload-notes" name="notes" rows="3"></textarea>
+        <div class="input-group">
+          <label for="upload-notes">備考:</label>
+          <textarea id="upload-notes" name="notes" rows="3"></textarea>
+        </div>
 
-        <label for="upload-image">画像ファイル:</label>
-        <input type="file" id="upload-image" name="image" accept="image/*">
-        <small>JPEG, PNG, WebP, GIF対応（最大5MB）</small>
+        <div class="input-group">
+          <label for="upload-image">画像ファイル:</label>
+          <input type="file" id="upload-image" name="image" accept="image/*">
+          <small>JPEG, PNG, WebP, GIF対応（最大5MB）</small>
+        </div>
 
-        <button type="submit" class="btn">登録</button>
+        <button type="submit" class="btn btn-primary">登録</button>
       </form>
     </section>
+
+  <!-- ポップアップメッセージ用のモーダル -->
+  <div id="messageModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="closeMessageModal">&times;</span>
+      <p id="modalMessage"></p>
+    </div>
+  </div>
 
     <hr>
 
