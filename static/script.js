@@ -1,5 +1,4 @@
 // グローバル変数
-
 let currentQuizData = null;
 let quizAnswered = false;
 let currentGenre = ''; // ジャンルを保持するグローバル変数

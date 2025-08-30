@@ -111,7 +111,7 @@ def get_quiz_stats(conn: sqlite3.Connection = Depends(get_db_connection)):
         raise HTTPException(status_code=500, detail=f"統計情報の取得に失敗しました: {e}")
 
 @router.get("/quiz/multiple-choice")
-def get_multiple_choice_quiz(genre: str, conn: sqlite3.Connection = Depends(get_db_connection)):
+def get_multiple_choice_quiz(genre: str, request: Request, conn: sqlite3.Connection = Depends(get_db_connection)):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM artworks WHERE image_filename IS NOT NULL AND image_filename != ''")
     image_artwork_count = cursor.fetchone()['COUNT(*)']
@@ -131,14 +131,73 @@ def get_multiple_choice_quiz(genre: str, conn: sqlite3.Connection = Depends(get_
         
     question_field = random.choice(possible_fields)
 
+    HISTORY_LENGTH = 5 # 直近N件の履歴を保持
+
+    # セッションからクイズ履歴を取得、なければ初期化
+    quiz_history = request.session.get("quiz_history", [])
+    
+    # 履歴にある作品IDを除外リストに追加
+    artwork_ids_to_exclude = tuple(quiz_history)
+    
+    # 除外条件のSQLを構築
+    exclude_sql = ""
+    if artwork_ids_to_exclude:
+        # SQLiteのIN句はタプルを直接受け入れる
+        exclude_sql = f" AND id NOT IN {artwork_ids_to_exclude}"
+        # タプルが単一要素の場合、SQLのIN句で '(ID,)' の形式になるように調整
+        if len(artwork_ids_to_exclude) == 1:
+            exclude_sql = f" AND id != {artwork_ids_to_exclude[0]}"
+
+    # 作品数をカウントし、除外リストが全作品をカバーしていないか確認
+    cursor.execute("SELECT COUNT(*) FROM artworks WHERE 1=1" + exclude_sql)
+    remaining_artwork_count = cursor.fetchone()['COUNT(*)']
+
+    # もし除外リストによって選択可能な作品がなくなったら、履歴をクリアして再試行
+    if remaining_artwork_count == 0 and artwork_ids_to_exclude:
+        quiz_history = []
+        request.session["quiz_history"] = [] # セッションもクリア
+        artwork_ids_to_exclude = tuple() # 除外リストもクリア
+        exclude_sql = "" # SQL除外条件もクリア
+        # 再度、全作品数をカウント
+        cursor.execute("SELECT COUNT(*) FROM artworks")
+        remaining_artwork_count = cursor.fetchone()['COUNT(*)']
+        if remaining_artwork_count == 0:
+            raise HTTPException(status_code=404, detail="適切なクイズデータが見つかりません。")
+
+
+    # クエリを修正して履歴にある作品を除外
     if question_field == "image":
-        cursor.execute("SELECT * FROM artworks WHERE image_filename IS NOT NULL AND image_filename != '' ORDER BY RANDOM() LIMIT 1")
+        query = f"SELECT * FROM artworks WHERE image_filename IS NOT NULL AND image_filename != ''{exclude_sql} ORDER BY RANDOM() LIMIT 1"
+        cursor.execute(query)
     else:
-        cursor.execute("SELECT * FROM artworks ORDER BY RANDOM() LIMIT 1")
+        query = f"SELECT * FROM artworks WHERE 1=1{exclude_sql} ORDER BY RANDOM() LIMIT 1"
+        cursor.execute(query)
     
     correct_row_tuple = cursor.fetchone()
+
+    # 適切なクイズデータが見つからない場合の処理
     if not correct_row_tuple:
-        raise HTTPException(status_code=404, detail="適切なクイズデータが見つかりません。")
+        # 履歴をクリアして再試行 (これは上記で既に処理されているはずだが、念のため)
+        quiz_history = []
+        request.session["quiz_history"] = []
+        # 再度クエリを実行 (ただし、このパスに来ることは稀なはず)
+        if question_field == "image":
+            query = "SELECT * FROM artworks WHERE image_filename IS NOT NULL AND image_filename != '' ORDER BY RANDOM() LIMIT 1"
+            cursor.execute(query)
+        else:
+            query = "SELECT * FROM artworks ORDER BY RANDOM() LIMIT 1"
+            cursor.execute(query)
+        correct_row_tuple = cursor.fetchone()
+        if not correct_row_tuple:
+            raise HTTPException(status_code=404, detail="適切なクイズデータが見つかりません。")
+
+    correct_row = dict(correct_row_tuple)
+
+    # 履歴に現在の作品IDを追加し、長さを管理
+    quiz_history.append(correct_row['id'])
+    if len(quiz_history) > HISTORY_LENGTH:
+        quiz_history.pop(0) # 最も古いものを削除
+    request.session["quiz_history"] = quiz_history
 
     correct_row = dict(correct_row_tuple)
     quiz_artwork_data = correct_row.copy()
