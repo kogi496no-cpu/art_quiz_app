@@ -13,9 +13,7 @@ export async function loadQuiz(genre) {
             throw new Error(err.detail || "クイズの取得に失敗しました。");
         }
         const data = await res.json();
-        console.log('Before assignment:', typeof currentQuizData, currentQuizData); // 追加
         currentQuizData = data;
-        console.log('After assignment:', typeof currentQuizData, currentQuizData); // 追加
         quizAnswered = false;
         const quizArea = document.getElementById('quiz-area');
         quizArea.innerHTML = '';

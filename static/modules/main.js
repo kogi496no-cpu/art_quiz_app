@@ -3,8 +3,6 @@ import { loadQuiz, toggleStats, loadStats, resetQuizStats } from './quiz.js';
 import { openMessageModal, closeMessageModal } from './utils.js';
 import { handleUploadSubmit, loadArtworks, handleEditSubmit, openEditModal, closeEditModal, deleteArtwork } from './artworks.js';
 
-let currentQuizData = null;
-let quizAnswered = false;
 export let currentGenre = ''; // ジャンルを保持するグローバル変数
 
 // DOMContentLoaded時の初期化
