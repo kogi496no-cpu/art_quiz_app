@@ -54,12 +54,7 @@ function initializeEventListeners() {
             const query = document.getElementById('search-input').value;
             loadArtworks(query, currentGenre);
         });
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', () => {
-                loadArtworks(searchInput.value, currentGenre);
-            });
-        }
+        
     }
     const editForm = document.getElementById('edit-form');
     if (editForm) {
