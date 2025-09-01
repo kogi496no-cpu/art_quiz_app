@@ -16,14 +16,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('quiz-area')) {
         loadStats(currentGenre);
     }
-    // 作品管理ページでのみ実行
+        // 作品管理ページでのみ実行
     if (document.getElementById('artworks-list')) {
-        // ボタンクリックで作品を読み込むように変更
+        // 「作品を表示/非表示」ボタンのトグル機能
         const loadBtn = document.getElementById('load-artworks-btn');
-        if (loadBtn) {
+        const artworksList = document.getElementById('artworks-list');
+        if (loadBtn && artworksList) {
             loadBtn.addEventListener('click', () => {
-                loadArtworks('', currentGenre);
-                loadBtn.style.display = 'none'; // ボタンを非表示にする
+                // artworksListに中身があるかで表示/非表示を切り替え
+                if (artworksList.innerHTML.trim() !== '') {
+                    artworksList.innerHTML = ''; // リストをクリア
+                    loadBtn.textContent = '作品を表示';
+                } else {
+                    loadArtworks('', currentGenre); // 作品を読み込み
+                    loadBtn.textContent = '非表示にする';
+                }
             });
         }
     }

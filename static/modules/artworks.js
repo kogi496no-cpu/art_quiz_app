@@ -18,7 +18,24 @@ export async function handleUploadSubmit(e, genre) {
             const result = await response.json();
             openMessageModal(result.message, 'success'); // ポップアップ表示に変更
             e.target.reset();
-            loadArtworks('', genre);
+
+            const artworksList = document.getElementById('artworks-list');
+            const artworkCountSpan = document.getElementById('artwork-count');
+
+            // 作品数を更新
+            if (artworkCountSpan) {
+                const currentCount = parseInt(artworkCountSpan.textContent, 10) || 0;
+                artworkCountSpan.textContent = currentCount + 1;
+            }
+
+            // リストが表示されていれば、新しい作品を先頭に追加
+            if (artworksList && artworksList.innerHTML.trim() !== '') {
+                const table = artworksList.querySelector('table');
+                if (table && result.artwork) {
+                    const newRow = createArtworkRow(result.artwork, genre);
+                    table.insertBefore(newRow, table.rows[1]); // ヘッダー行の直後に追加
+                }
+            }
         } else {
             const errorData = await response.json();
             openMessageModal('エラー: ' + (errorData.detail || '保存に失敗しました'), 'error'); // ポップアップ表示に変更
