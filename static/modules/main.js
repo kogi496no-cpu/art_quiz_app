@@ -3,8 +3,6 @@ import { loadQuiz, toggleStats, loadStats, resetQuizStats } from './quiz.js';
 import { openMessageModal, closeMessageModal } from './utils.js';
 import { handleUploadSubmit, loadArtworks, handleEditSubmit, openEditModal, closeEditModal, deleteArtwork } from './artworks.js';
 
-let currentQuizData = null;
-let quizAnswered = false;
 export let currentGenre = ''; // ジャンルを保持するグローバル変数
 
 // DOMContentLoaded時の初期化
@@ -56,12 +54,7 @@ function initializeEventListeners() {
             const query = document.getElementById('search-input').value;
             loadArtworks(query, currentGenre);
         });
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', () => {
-                loadArtworks(searchInput.value, currentGenre);
-            });
-        }
+        
     }
     const editForm = document.getElementById('edit-form');
     if (editForm) {

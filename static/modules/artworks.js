@@ -18,7 +18,7 @@ export async function handleUploadSubmit(e, genre) {
             const result = await response.json();
             openMessageModal(result.message, 'success'); // ポップアップ表示に変更
             e.target.reset();
-            loadArtworks();
+            loadArtworks('', genre);
         } else {
             const errorData = await response.json();
             openMessageModal('エラー: ' + (errorData.detail || '保存に失敗しました'), 'error'); // ポップアップ表示に変更
