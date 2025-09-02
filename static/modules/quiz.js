@@ -4,19 +4,25 @@ let currentQuizData = null;
 let quizAnswered = false;
 import { escapeHtml, openMessageModal } from './utils.js';
 
-export async function loadQuiz(genre) {
+export function applyTheme(genre) {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
-    let endpoint;
+    document.body.className = genre; // Start with base genre class
+
     if (mode === 'review') {
-        endpoint = `/api/${genre}/quiz/review`;
-        // 復習モードのタイトルや説明などをここに表示しても良い
+        document.body.classList.add('review-mode');
         const titleElement = document.querySelector('.container h1');
-        if(titleElement) titleElement.textContent = '復習クイズ';
-    } else {
-        endpoint = `/api/${genre}/quiz/multiple-choice`;
+        if(titleElement) titleElement.innerHTML = '【集中復習モード】<span class="subtitle">弱点を克服せよ！</span>';
     }
+}
+
+export async function loadQuiz(genre) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const quizArea = document.getElementById('quiz-area');
+
+    const endpoint = (mode === 'review') ? `/api/${genre}/quiz/review` : `/api/${genre}/quiz/multiple-choice`;
 
     try {
         const res = await fetch(endpoint);
@@ -27,13 +33,10 @@ export async function loadQuiz(genre) {
         const data = await res.json();
         currentQuizData = data;
         quizAnswered = false;
-        const quizArea = document.getElementById('quiz-area');
-        quizArea.innerHTML = '';
+        quizArea.innerHTML = ''; // Clear before display
         displayMultipleChoiceQuiz(data, genre);
     } catch (error) {
-        const quizArea = document.getElementById('quiz-area');
         quizArea.innerHTML = `<p class="error">${error.message}</p>`;
-        // ホームに戻るボタンなどを表示
         const backButton = document.createElement('a');
         backButton.href = '/';
         backButton.className = 'btn btn-secondary';
@@ -147,9 +150,12 @@ export function showQuizResult(isCorrect, selectedChoice, genre) {
         resultDiv.innerHTML += `<p><strong>備考:</strong> ${escapeHtml(full_artwork_data.notes)}</p>`;
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+
     const nextButton = document.createElement('button');
     nextButton.className = 'btn btn-primary mt-3';
-    nextButton.textContent = '次のクイズ';
+    nextButton.textContent = (mode === 'review') ? '次の復習問題へ' : '次のクイズ';
     nextButton.onclick = () => loadQuiz(genre);
     resultDiv.appendChild(nextButton);
     document.getElementById('quiz-area').appendChild(resultDiv);

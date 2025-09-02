@@ -336,3 +336,59 @@ section h2 {
     color: black;
     text-decoration: none;
 }
+
+/* --- Review Mode Styles (Dark Theme) --- */
+body.japanese.review-mode {
+    background: #2c3e50 !important; /* Dark blue-grey background */
+}
+
+.review-mode section {
+    background: #34495e; /* Slightly lighter container background */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border: 1px solid #4a627a;
+}
+
+.review-mode h1, .review-mode h2 {
+    color: #fff;
+    border-bottom: none;
+}
+
+.review-mode h1 .subtitle {
+    display: block;
+    font-size: 1rem;
+    font-weight: 400;
+    margin-top: 0.5rem;
+    color: #bdc3c7; /* Light grey for subtitle */
+}
+
+.review-mode p,
+.review-mode h3,
+.review-mode strong,
+.review-mode label,
+.review-mode .quiz-result {
+    color: #ecf0f1; /* Light text color for dark theme */
+}
+
+.review-mode .choice-button {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    border: 1px solid #7f8c8d;
+}
+
+.review-mode .choice-button:hover {
+    background-color: #9b59b6;
+    border-color: #9b59b6;
+}
+
+.review-mode .btn-primary {
+    background: linear-gradient(45deg, #9b59b6, #8e44ad);
+    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+}
+
+.review-mode .quiz-result.correct {
+    background-color: #27ae60;
+}
+
+.review-mode .quiz-result.incorrect {
+    background-color: #c0392b;
+}

@@ -1,5 +1,5 @@
 // グローバル変数
-import { loadQuiz, toggleStats, loadStats, resetQuizStats } from './quiz.js';
+import { loadQuiz, toggleStats, loadStats, resetQuizStats, applyTheme } from './quiz.js';
 import { openMessageModal, closeMessageModal } from './utils.js';
 import { handleUploadSubmit, loadArtworks, handleEditSubmit, openEditModal, closeEditModal, deleteArtwork } from './artworks.js';
 
@@ -14,9 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // クイズページでのみ実行
     if (document.getElementById('quiz-area')) {
+        applyTheme(currentGenre); // Apply theme on page load
         loadStats(currentGenre);
     }
-        // 作品管理ページでのみ実行
+    // 作品管理ページでのみ実行
     if (document.getElementById('artworks-list')) {
         // 「作品を表示/非表示」ボタンのトグル機能
         const loadBtn = document.getElementById('load-artworks-btn');
@@ -72,4 +73,3 @@ function initializeEventListeners() {
         resetBtn.addEventListener('click', () => resetQuizStats(currentGenre));
     }
 }
-
