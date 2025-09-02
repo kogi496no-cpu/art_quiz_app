@@ -37,14 +37,26 @@ def get_similar_choices(all_artworks: List[dict], correct_artwork: dict, field: 
     similar_indices = cosine_sim.argsort()[::-1]
     
     choices = []
-    correct_answer_value = correct_artwork[field]
-    
+    # 回答の文字列の空白を除去
+    correct_answer_value = correct_artwork[field].strip()
+    # 既に追加した選択肢（空白除去済み）を保持するセット
+    added_choices_stripped = {correct_answer_value}
+
     for idx in similar_indices:
         if idx != correct_index:
             artwork = all_artworks[idx]
-            choice_value = artwork[field]
-            if choice_value and choice_value != correct_answer_value and choice_value not in choices:
-                choices.append(choice_value)
+            choice_value = artwork.get(field)
+
+            if not choice_value:
+                continue
+
+            choice_value_stripped = choice_value.strip()
+            
+            # 空白除去後の文字列で重複をチェック
+            if choice_value_stripped and choice_value_stripped not in added_choices_stripped:
+                choices.append(choice_value) # 元の文字列を追加
+                added_choices_stripped.add(choice_value_stripped)
+
         if len(choices) >= num_choices:
             break
             
@@ -232,19 +244,26 @@ def get_multiple_choice_quiz(genre: str, request: Request, conn: sqlite3.Connect
         
         dummy_answers = get_similar_choices(all_artworks, correct_row, question_field)
 
+        # 既に選ばれた選択肢を空白除去してセットで保持
+        added_choices_stripped = {correct_answer.strip()}
+        for ans in dummy_answers:
+            added_choices_stripped.add(ans.strip())
+
         if len(dummy_answers) < 3:
             cursor.execute(f"""
                 SELECT DISTINCT {question_field} FROM artworks 
-                WHERE {question_field} != ? AND {question_field} IS NOT NULL AND {question_field} != ''
+                WHERE {question_field} IS NOT NULL AND {question_field} != ''
                 ORDER BY RANDOM()
-            """, (correct_answer,))
+            """, ())
             
             fallback_candidates = [row[question_field] for row in cursor.fetchall()]
             for candidate in fallback_candidates:
-                if candidate not in dummy_answers:
-                    dummy_answers.append(candidate)
                 if len(dummy_answers) >= 3:
                     break
+                candidate_stripped = candidate.strip()
+                if candidate_stripped and candidate_stripped not in added_choices_stripped:
+                    dummy_answers.append(candidate)
+                    added_choices_stripped.add(candidate_stripped)
 
         if len(dummy_answers) < 3:
             fallback_options = {
@@ -377,19 +396,26 @@ def get_review_quiz(genre: str, request: Request, conn: sqlite3.Connection = Dep
         
         dummy_answers = get_similar_choices(all_artworks, correct_row, question_field)
 
+        # 既に選ばれた選択肢を空白除去してセットで保持
+        added_choices_stripped = {correct_answer.strip()}
+        for ans in dummy_answers:
+            added_choices_stripped.add(ans.strip())
+
         if len(dummy_answers) < 3:
             cursor.execute(f"""
                 SELECT DISTINCT {question_field} FROM artworks 
-                WHERE {question_field} != ? AND {question_field} IS NOT NULL AND {question_field} != ''
+                WHERE {question_field} IS NOT NULL AND {question_field} != ''
                 ORDER BY RANDOM()
-            """, (correct_answer,))
+            """, ())
             
             fallback_candidates = [row[question_field] for row in cursor.fetchall()]
             for candidate in fallback_candidates:
-                if candidate not in dummy_answers:
-                    dummy_answers.append(candidate)
                 if len(dummy_answers) >= 3:
                     break
+                candidate_stripped = candidate.strip()
+                if candidate_stripped and candidate_stripped not in added_choices_stripped:
+                    dummy_answers.append(candidate)
+                    added_choices_stripped.add(candidate_stripped)
         
         i = 1
         while len(dummy_answers) < 3:
