@@ -5,7 +5,19 @@ let quizAnswered = false;
 import { escapeHtml, openMessageModal } from './utils.js';
 
 export async function loadQuiz(genre) {
-    const endpoint = `/api/${genre}/quiz/multiple-choice`;
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+
+    let endpoint;
+    if (mode === 'review') {
+        endpoint = `/api/${genre}/quiz/review`;
+        // 復習モードのタイトルや説明などをここに表示しても良い
+        const titleElement = document.querySelector('.container h1');
+        if(titleElement) titleElement.textContent = '復習クイズ';
+    } else {
+        endpoint = `/api/${genre}/quiz/multiple-choice`;
+    }
+
     try {
         const res = await fetch(endpoint);
         if (!res.ok) {
@@ -19,7 +31,14 @@ export async function loadQuiz(genre) {
         quizArea.innerHTML = '';
         displayMultipleChoiceQuiz(data, genre);
     } catch (error) {
-        document.getElementById('quiz-area').innerHTML = `<p class="error">${error.message}</p>`;
+        const quizArea = document.getElementById('quiz-area');
+        quizArea.innerHTML = `<p class="error">${error.message}</p>`;
+        // ホームに戻るボタンなどを表示
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-secondary';
+        backButton.textContent = 'ジャンル選択に戻る';
+        quizArea.appendChild(backButton);
     }
 }
 
@@ -137,12 +156,18 @@ export function showQuizResult(isCorrect, selectedChoice, genre) {
 }
 
 export async function recordQuizResult(isCorrect, userAnswer, genre) {
-    const { question_field, correct_answer } = currentQuizData;
+    const { question_field, correct_answer, full_artwork_data } = currentQuizData;
     try {
         await fetch(`/api/${genre}/quiz/submit`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ question_field, correct_answer, user_answer: userAnswer, is_correct: isCorrect })
+            body: JSON.stringify({ 
+                artwork_id: full_artwork_data.id,
+                question_field, 
+                correct_answer, 
+                user_answer: userAnswer, 
+                is_correct: isCorrect 
+            })
         });
         loadStats(genre);
     } catch (error) {
