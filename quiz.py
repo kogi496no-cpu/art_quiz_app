@@ -15,6 +15,7 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 class QuizResult(BaseModel):
+    artwork_id: int
     question_field: str
     correct_answer: str
     user_answer: str
@@ -57,9 +58,9 @@ def submit_quiz_result(
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO quiz_results (question_field, correct_answer, user_answer, is_correct) 
-            VALUES (?, ?, ?, ?)
-        """, (result.question_field, result.correct_answer, result.user_answer, result.is_correct))
+            INSERT INTO quiz_results (artwork_id, question_field, correct_answer, user_answer, is_correct) 
+            VALUES (?, ?, ?, ?, ?)
+        """, (result.artwork_id, result.question_field, result.correct_answer, result.user_answer, result.is_correct))
         conn.commit()
         return {"message": "結果を記録しました"}
     except Exception as e:
@@ -310,3 +311,103 @@ def get_recent_results(genre: str, conn: sqlite3.Connection = Depends(get_db_con
         return [dict(row) for row in results]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"最近の結果の取得に失敗しました: {e}")
+
+
+@router.get("/quiz/review")
+def get_review_quiz(genre: str, request: Request, conn: sqlite3.Connection = Depends(get_db_connection)):
+    cursor = conn.cursor()
+    
+    # 不正解だった問題のartwork_idを重複なく取得
+    cursor.execute("""
+        SELECT DISTINCT artwork_id FROM quiz_results WHERE is_correct = 0
+    """)
+    incorrect_artwork_ids = [row['artwork_id'] for row in cursor.fetchall()]
+
+    if not incorrect_artwork_ids:
+        raise HTTPException(status_code=404, detail="復習する問題がありません。")
+
+    # 不正解リストからランダムに一つ選択
+    artwork_id_to_review = random.choice(incorrect_artwork_ids)
+
+    # 選択された作品のデータを取得
+    cursor.execute("SELECT * FROM artworks WHERE id = ?", (artwork_id_to_review,))
+    correct_row_tuple = cursor.fetchone()
+
+    if not correct_row_tuple:
+        # quiz_resultsには存在するがartworksテーブルからは削除されている場合など
+        raise HTTPException(status_code=404, detail="クイズ対象の作品データが見つかりません。")
+
+    correct_row = dict(correct_row_tuple)
+
+    # 通常のクイズ生成ロジックを再利用
+    possible_fields = ["author", "title", "style"]
+    if correct_row.get("image_filename"):
+        possible_fields.append("image")
+    
+    question_field = random.choice(possible_fields)
+
+    quiz_artwork_data = correct_row.copy()
+    choices = []
+    correct_answer = ""
+    question_text = ""
+
+    if question_field == "image":
+        correct_answer = correct_row["image_filename"]
+        cursor.execute("""
+            SELECT image_filename FROM artworks 
+            WHERE image_filename IS NOT NULL AND image_filename != '' AND id != ? 
+            ORDER BY RANDOM() LIMIT 3
+        """, (correct_row["id"],))
+        dummy_answers = [row['image_filename'] for row in cursor.fetchall()]
+        
+        if len(dummy_answers) < 3:
+            raise HTTPException(status_code=500, detail="画像クイズの選択肢作成に失敗しました。画像付きの作品が4つ以上必要です。")
+
+        choices = [correct_answer] + dummy_answers
+        random.shuffle(choices)
+        
+        quiz_artwork_data["image_filename"] = "???"
+        question_text = "この作品の画像はどれ？"
+
+    else:
+        correct_answer = correct_row[question_field]
+        
+        cursor.execute("SELECT * FROM artworks")
+        all_artworks = [dict(row) for row in cursor.fetchall()]
+        
+        dummy_answers = get_similar_choices(all_artworks, correct_row, question_field)
+
+        if len(dummy_answers) < 3:
+            cursor.execute(f"""
+                SELECT DISTINCT {question_field} FROM artworks 
+                WHERE {question_field} != ? AND {question_field} IS NOT NULL AND {question_field} != ''
+                ORDER BY RANDOM()
+            """, (correct_answer,))
+            
+            fallback_candidates = [row[question_field] for row in cursor.fetchall()]
+            for candidate in fallback_candidates:
+                if candidate not in dummy_answers:
+                    dummy_answers.append(candidate)
+                if len(dummy_answers) >= 3:
+                    break
+        
+        i = 1
+        while len(dummy_answers) < 3:
+            dummy_answers.append(f"ダミー選択肢{i}")
+            i += 1
+
+        choices = [correct_answer] + dummy_answers[:3]
+        random.shuffle(choices)
+        
+        quiz_artwork_data[question_field] = "???"
+        field_names = {"author": "作者", "title": "作品名", "style": "美術様式"}
+        question_text = f"この作品の{field_names.get(question_field, '情報')}は？"
+
+    return {
+        "artwork": quiz_artwork_data,
+        "full_artwork_data": correct_row,
+        "question": question_text,
+        "question_field": question_field,
+        "choices": choices,
+        "correct_answer": correct_answer
+    }
