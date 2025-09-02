@@ -124,6 +124,13 @@ async def add_artwork_with_image(
     image: Optional[UploadFile] = File(None),
     conn: sqlite3.Connection = Depends(get_db_connection)
 ):
+    # サニタイズ
+    author = author.strip()
+    title = title.strip()
+    style = style.strip()
+    if notes:
+        notes = notes.strip()
+
     image_filename = None
     try:
         cursor = conn.cursor()
