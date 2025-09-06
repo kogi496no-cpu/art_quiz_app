@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズ統計 - {{ genre.capitalize() }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-genre="{{ genre }}" class="stats-page">
+    <div class="container">
+        <h1>クイズ統計 - {{ genre.capitalize() }}</h1>
+        <div class="stats-container">
+            <div class="chart-container">
+                <h2>全体の正解率</h2>
+                <canvas id="overallAccuracyChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>分野別の正解率</h2>
+                <canvas id="fieldAccuracyChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>分野別の回答数</h2>
+                <canvas id="fieldAttemptsChart"></canvas>
+            </div>
+        </div>
+        <div class="recent-results-container">
+            <h2>最近の回答履歴</h2>
+            <table id="recentResultsTable">
+                <thead>
+                    <tr>
+                        <th>問題の分野</th>
+                        <th>正解</th>
+                        <th>あなたの回答</th>
+                        <th>結果</th>
+                        <th>日時</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ここに最近の結果が挿入されます -->
+                </tbody>
+            </table>
+        </div>
+        <a href="/" class="btn">トップに戻る</a>
+        <button id="reset-stats-btn" class="btn btn-danger">このジャンルの統計をリセット</button>
+    </div>
+    <script src="/static/modules/stats.js"></script>
+</body>
+</html>

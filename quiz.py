@@ -9,7 +9,8 @@ from typing import List
 from database import get_db_connection
 from quiz_builder import build_quiz_data
 
-router = APIRouter()
+quiz_router = APIRouter()
+stats_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 class QuizResult(BaseModel):
@@ -20,7 +21,7 @@ class QuizResult(BaseModel):
     is_correct: bool
 
 
-@router.post("/quiz/submit")
+@quiz_router.post("/quiz/submit")
 def submit_quiz_result(
     result: QuizResult,
     conn: sqlite3.Connection = Depends(get_db_connection)
@@ -37,8 +38,8 @@ def submit_quiz_result(
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"結果の記録に失敗しました: {e}")
 
-@router.get("/quiz/stats")
-def get_quiz_stats(conn: sqlite3.Connection = Depends(get_db_connection)):
+@stats_router.get("/quiz/stats/{genre}")
+def get_quiz_stats(genre: str, conn: sqlite3.Connection = Depends(get_db_connection)):
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM quiz_results")
@@ -81,7 +82,13 @@ def get_quiz_stats(conn: sqlite3.Connection = Depends(get_db_connection)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"統計情報の取得に失敗しました: {e}")
 
-@router.get("/quiz/multiple-choice")
+
+@stats_router.get("/quiz/stats_view/{genre}", response_class=HTMLResponse)
+async def get_quiz_stats_view(request: Request, genre: str):
+    return templates.TemplateResponse("quiz_stats.html", {"request": request, "genre": genre})
+
+
+@quiz_router.get("/quiz/multiple-choice")
 def get_multiple_choice_quiz(genre: str, request: Request, conn: sqlite3.Connection = Depends(get_db_connection)):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM artworks")
@@ -137,8 +144,8 @@ def get_multiple_choice_quiz(genre: str, request: Request, conn: sqlite3.Connect
 
     return build_quiz_data(correct_row, conn, genre, question_field)
 
-@router.post("/quiz/reset")
-def reset_quiz_results(conn: sqlite3.Connection = Depends(get_db_connection)):
+@quiz_router.post("/quiz/reset")
+def reset_quiz_results(genre: str, conn: sqlite3.Connection = Depends(get_db_connection)):
     try:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM quiz_results")
@@ -148,7 +155,7 @@ def reset_quiz_results(conn: sqlite3.Connection = Depends(get_db_connection)):
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"リセットに失敗しました")
 
-@router.get("/quiz/recent-results")
+@quiz_router.get("/quiz/recent-results")
 def get_recent_results(genre: str, conn: sqlite3.Connection = Depends(get_db_connection)):
     try:
         cursor = conn.cursor()
@@ -164,7 +171,7 @@ def get_recent_results(genre: str, conn: sqlite3.Connection = Depends(get_db_con
         raise HTTPException(status_code=500, detail=f"最近の結果の取得に失敗しました: {e}")
 
 
-@router.get("/quiz/review")
+@quiz_router.get("/quiz/review")
 def get_review_quiz(genre: str, request: Request, conn: sqlite3.Connection = Depends(get_db_connection)):
     cursor = conn.cursor()
     
