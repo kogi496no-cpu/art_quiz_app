@@ -110,6 +110,24 @@ function renderFieldAccuracyChart(fieldStats) {
     const labels = fieldStats.map(stat => stat.field);
     const accuracyData = fieldStats.map(stat => stat.accuracy);
 
+    // ジャンルごとの色を定義
+    const backgroundColors = [
+        'rgba(255, 99, 132, 0.7)', // 赤
+        'rgba(54, 162, 235, 0.7)', // 青
+        'rgba(255, 206, 86, 0.7)', // 黄
+        'rgba(75, 192, 192, 0.7)', // 緑
+        'rgba(153, 102, 255, 0.7)',// 紫
+        'rgba(255, 159, 64, 0.7)'  // オレンジ
+    ];
+    const borderColors = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ];
+
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -117,16 +135,17 @@ function renderFieldAccuracyChart(fieldStats) {
             datasets: [{
                 label: '正解率 (%)',
                 data: accuracyData,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            indexAxis: 'y',
             scales: {
-                y: {
+                x: {
                     beginAtZero: true,
                     max: 100,
                     ticks: {
@@ -170,11 +189,12 @@ function renderFieldAttemptsChart(fieldStats) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            indexAxis: 'y',
             scales: {
-                x: {
+                y: {
                     stacked: true,
                 },
-                y: {
+                x: {
                     stacked: true,
                     beginAtZero: true
                 }
