@@ -1,5 +1,5 @@
 // グローバル変数
-import { loadQuiz, toggleStats, loadStats, resetQuizStats, applyTheme } from './quiz.js';
+import { loadQuiz, applyTheme } from './quiz.js';
 import { openMessageModal, closeMessageModal } from './utils.js';
 import { handleUploadSubmit, loadArtworks, handleEditSubmit, openEditModal, closeEditModal, deleteArtwork } from './artworks.js';
 
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // クイズページでのみ実行
     if (document.getElementById('quiz-area')) {
         applyTheme(currentGenre); // Apply theme on page load
-        loadStats(currentGenre);
     }
     // 作品管理ページでのみ実行
     if (document.getElementById('artworks-list')) {
@@ -44,9 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // クイズ関連関数をグローバルスコープに公開
     window.loadQuiz = () => loadQuiz(currentGenre);
-    window.toggleStats = () => toggleStats(currentGenre);
-    window.loadStats = () => loadStats(currentGenre);
-    window.resetQuizStats = () => resetQuizStats(currentGenre);
 });
 
 // イベントリスナーの初期化
@@ -67,9 +63,5 @@ function initializeEventListeners() {
     const editForm = document.getElementById('edit-form');
     if (editForm) {
         editForm.addEventListener('submit', (e) => handleEditSubmit(e, currentGenre));
-    }
-    const resetBtn = document.getElementById('reset-quiz-btn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => resetQuizStats(currentGenre));
     }
 }

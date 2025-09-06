@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 # ルーターをインポート
 from artworks import router as artworks_router
-from quiz import router as quiz_router
+from quiz import quiz_router, stats_router
 
 app = FastAPI()
 
@@ -21,7 +21,8 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# ルーターをジャンルごとのプレフィックスで登録
+# ルーターを登録
+app.include_router(stats_router)
 app.include_router(artworks_router, prefix="/api/{genre}")
 app.include_router(quiz_router, prefix="/api/{genre}")
 

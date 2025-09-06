@@ -175,66 +175,7 @@ export async function recordQuizResult(isCorrect, userAnswer, genre) {
                 is_correct: isCorrect 
             })
         });
-        loadStats(genre);
     } catch (error) {
         console.error('結果の記録に失敗:', error);
-    }
-}
-
-export function toggleStats(genre) {
-    const statsContent = document.getElementById('stats-content');
-    if (!statsContent) return;
-    statsContent.classList.toggle('hidden');
-    const btn = statsContent.previousElementSibling;
-    if (btn) btn.textContent = statsContent.classList.contains('hidden') ? '統計を表示' : '統計を非表示';
-
-    if (!statsContent.classList.contains('hidden')) {
-        loadStats(genre);
-    }
-}
-
-export async function loadStats(genre) {
-    const statsContent = document.getElementById('stats-content');
-    if (!statsContent) return;
-    try {
-        const res = await fetch(`/api/${genre}/quiz/stats`);
-        const stats = await res.json();
-        const fieldNames = {author:'作者', title:'作品名', style:'様式', image: '画像'};
-        statsContent.innerHTML = `
-            <div class="stats-grid">
-                <div class="stats-card"><div>${stats.total_attempts}</div><div>総回答数</div></div>
-                <div class="stats-card"><div>${stats.correct_attempts}</div><div>正解数</div></div>
-                <div class="stats-card"><div>${stats.overall_accuracy}%</div><div>正答率</div></div>
-            </div>
-            <h4>分野別統計</h4>
-            <div class="stats-grid">
-                ${(stats.field_stats.map(f => `
-                    <div class="stats-card">
-                        <div>${f.accuracy}%</div>
-                        <div>${fieldNames[f.field] || f.field}</div>
-                    </div>`
-                )).join('')}
-            </div>
-        `;
-    } catch (error) {
-        console.error('統計の読み込みに失敗:', error);
-        statsContent.innerHTML = '<p>統計の読み込みに失敗しました。</p>';
-    }
-}
-
-export async function resetQuizStats(genre) {
-    if (!confirm('本当にこのジャンルのクイズ結果をリセットしますか？')) return;
-    try {
-        const res = await fetch(`/api/${genre}/quiz/reset`, { method: 'POST' });
-        if (res.ok) {
-            openMessageModal('クイズ結果をリセットしました', 'success');
-            loadStats(genre);
-            document.getElementById('quiz-area').innerHTML = '';
-        } else {
-            const err = await res.json();
-            openMessageModal('リセット失敗: ' + (err.detail || '不明なエラー'), 'error');
-        }
-    } catch (error) {
-        openMessageModal('ネットワークエラー: ' + error.message, 'error');
     }
 }

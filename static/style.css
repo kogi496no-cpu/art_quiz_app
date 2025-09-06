@@ -100,4 +100,88 @@ p {
     box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
 }
 
+.stats-link-container {
+    margin-bottom: 2rem;
+}
 
+.btn-stats {
+    background: linear-gradient(45deg, #f1c40f, #f39c12);
+    box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* Stats Page Specific Styles */
+.stats-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    width: 100%;
+    max-width: 1200px; /* Limit overall width */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chart-container {
+    position: relative;
+    flex: 1 1 300px; /* Flex-grow, flex-shrink, and basis */
+    max-width: 500px; /* Max width for each chart */
+    height: 400px; /* Fixed height for the container */
+    padding: 1rem;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.chart-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #34495e;
+}
+
+.recent-results-container {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#recentResultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+#recentResultsTable th, #recentResultsTable td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+#recentResultsTable th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+#recentResultsTable .correct {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+#recentResultsTable .incorrect {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+/* Adjust main container for stats page to be wider */
+body.stats-page .container {
+    max-width: 90%;
+    padding: 2rem;
+}
