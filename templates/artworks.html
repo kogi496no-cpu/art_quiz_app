@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>作品管理 - {{ genre.capitalize() }}</title>
   <link rel="stylesheet" href="{{ url_for('static', path=css_file) }}">
+  <style>
+    #search-input {
+      padding: 0.9rem 1.4rem !important;
+      font-size: 0.8rem !important;
+    }
+  </style>
 </head>
 <body class="{{ genre }}" data-genre="{{ genre }}">
   <div class="app-container">
@@ -69,7 +75,7 @@
         </div>
         <div class="artwork-controls mb-3">
           <button id="load-artworks-btn" class="btn btn-primary">作品を表示</button>
-          <p class="artwork-count-display">登録作品数: <span id="artwork-count">0</span></p>
+          <p class="artwork-count-display">表示件数: <span id="artwork-count">0</span></p>
         </div>
         <div id="artworks-list"></div>
     </section>

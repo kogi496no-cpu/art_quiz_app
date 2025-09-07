@@ -55,8 +55,10 @@ function initializeEventListeners() {
     if (searchForm) {
         searchForm.addEventListener('submit', e => {
             e.preventDefault();
-            const query = document.getElementById('search-input').value;
-            loadArtworks(query, currentGenre);
+            const query = document.getElementById('search-input').value.trim();
+            if (query) {
+                loadArtworks(query, currentGenre);
+            }
         });
         
     }
