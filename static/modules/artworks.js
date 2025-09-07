@@ -60,8 +60,8 @@ export async function loadArtworks(searchQuery = '', genre) {
         const res = await fetch(url);
         const data = await res.json();
 
-        // 検索クエリがない場合のみ作品数を更新
-        if (searchQuery === '' && artworkCountSpan) {
+        // 常に作品数を更新
+        if (artworkCountSpan) {
             artworkCountSpan.textContent = data.artworks.length;
         }
         
