@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    Chart.register(ChartDataLabels);
     const genre = document.body.dataset.genre;
     if (!genre) {
         console.error('ジャンルが指定されていません。');
@@ -98,6 +99,19 @@ function renderOverallAccuracyChart(data) {
                             label += `${value}問 (${percentage})`;
                             return label;
                         }
+                    }
+                },
+                datalabels: {
+                    display: true,
+                    formatter: (value, ctx) => {
+                        const total = ctx.chart.getDatasetMeta(0).total;
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                        return percentage;
+                    },
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 16,
                     }
                 }
             }
