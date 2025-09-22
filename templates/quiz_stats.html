@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>クイズ統計 - {{ genre.capitalize() }}</title>
+    <link rel="icon" href="{{ url_for('static', path='favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body data-genre="{{ genre }}" class="stats-page">
     <div class="container">
