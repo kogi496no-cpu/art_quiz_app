@@ -92,6 +92,8 @@ def get_artworks(
         cursor = conn.cursor()
         search_query = request.query_params.get('q', None)
         
+        print(f"DEBUG: get_artworks called with genre='{genre}' and search_query='{search_query}") # ★この行を追加
+        
         base_query = "SELECT id, author, title, style, image_filename, image_size, image_type, notes FROM artworks"
         params = []
         

@@ -4,6 +4,7 @@ import { openMessageModal, closeMessageModal } from './utils.js';
 import { handleUploadSubmit, loadArtworks, handleEditSubmit, openEditModal, closeEditModal, deleteArtwork } from './artworks.js';
 
 export let currentGenre = ''; // ジャンルを保持するグローバル変数
+export let currentSearchQuery = ''; // ★追加: 現在の検索クエリを保持する変数
 
 // DOMContentLoaded時の初期化
 document.addEventListener('DOMContentLoaded', function() {
@@ -18,6 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // 作品管理ページでのみ実行
     if (document.getElementById('artworks-list')) {
+        // 初期ロード時に検索クエリを保存
+        const initialSearchInput = document.getElementById('search-input');
+        if (initialSearchInput) {
+            currentSearchQuery = initialSearchInput.value.trim();
+        }
         // 「作品を表示/非表示」ボタンのトグル機能
         const loadBtn = document.getElementById('load-artworks-btn');
         const artworksList = document.getElementById('artworks-list');
@@ -56,9 +62,8 @@ function initializeEventListeners() {
         searchForm.addEventListener('submit', e => {
             e.preventDefault();
             const query = document.getElementById('search-input').value.trim();
-            if (query) {
-                loadArtworks(query, currentGenre);
-            }
+            currentSearchQuery = query; // ★追加: 検索クエリを保存
+            loadArtworks(query, currentGenre);
         });
         
     }
