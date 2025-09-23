@@ -2,6 +2,7 @@
 
 
 import { escapeHtml, openMessageModal } from './utils.js';
+import { currentSearchQuery } from './main.js'; // ★追加: currentSearchQuery をインポート
 
 // 作品登録 (画像アップロード対応)
 export async function handleUploadSubmit(e, genre) {
@@ -19,23 +20,9 @@ export async function handleUploadSubmit(e, genre) {
             openMessageModal(result.message, 'success'); // ポップアップ表示に変更
             e.target.reset();
 
-            const artworksList = document.getElementById('artworks-list');
-            const artworkCountSpan = document.getElementById('artwork-count');
-
-            // 作品数を更新
-            if (artworkCountSpan) {
-                const currentCount = parseInt(artworkCountSpan.textContent, 10) || 0;
-                artworkCountSpan.textContent = currentCount + 1;
-            }
-
-            // リストが表示されていれば、新しい作品を先頭に追加
-            if (artworksList && artworksList.innerHTML.trim() !== '') {
-                const table = artworksList.querySelector('table');
-                if (table && result.artwork) {
-                    const newRow = createArtworkRow(result.artwork, genre);
-                    table.insertBefore(newRow, table.rows[1]); // ヘッダー行の直後に追加
-                }
-            }
+            // 現在の検索クエリを取得して、作品リストを再読み込み
+            // const searchQuery = document.getElementById('search-input').value; // ★削除
+            loadArtworks(currentSearchQuery, genre); // ★変更: 保存されたクエリを使用
         } else {
             const errorData = await response.json();
             openMessageModal('エラー: ' + (errorData.detail || '保存に失敗しました'), 'error'); // ポップアップ表示に変更
@@ -143,7 +130,8 @@ export async function deleteArtwork(artworkId, genre) {
         const response = await fetch(`/api/${genre}/artworks/${artworkId}`, { method: 'DELETE' });
         if (response.ok) {
             openMessageModal('作品を削除しました', 'success');
-            loadArtworks('', genre);
+            // const searchQuery = document.getElementById('search-input').value; // ★削除
+            loadArtworks(currentSearchQuery, genre); // ★変更: 保存されたクエリを使用
         } else {
             const errorData = await response.json();
             openMessageModal('エラー: ' + (errorData.detail || '削除に失敗しました'), 'error');
@@ -189,7 +177,8 @@ export async function handleEditSubmit(e, genre) {
         if (response.ok) {
             openMessageModal('更新しました', 'success');
             closeEditModal();
-            loadArtworks('', genre);
+            // const searchQuery = document.getElementById('search-input').value; // ★削除
+            loadArtworks(currentSearchQuery, genre); // ★変更: 保存されたクエリを使用
         } else {
             const errorData = await response.json();
             openMessageModal('エラー: ' + (errorData.detail || '更新に失敗しました'), 'error');
