@@ -238,3 +238,8 @@ __marimo__/
 !/uploads/japanese_images/.gitkeep
 !/uploads/japanese_thumbnails/.gitkeep
 GEMINI.md
+# gemini-cli settings
+.gemini/
+
+# GitHub App credentials
+gha-creds-*.json

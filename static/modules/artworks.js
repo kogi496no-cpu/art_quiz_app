@@ -20,9 +20,20 @@ export async function handleUploadSubmit(e, genre) {
             openMessageModal(result.message, 'success'); // ポップアップ表示に変更
             e.target.reset();
 
-            // 現在の検索クエリを取得して、作品リストを再読み込み
-            // const searchQuery = document.getElementById('search-input').value; // ★削除
-            loadArtworks(currentSearchQuery, genre); // ★変更: 保存されたクエリを使用
+            // ユーザーの思想に沿って、検索クエリがない場合は全件表示しない
+            if (currentSearchQuery) {
+                loadArtworks(currentSearchQuery, genre); // 検索条件があればフィルタリングして再表示
+            } else {
+                // 検索条件がない場合は、リストをクリアしてメッセージを表示
+                const artworksList = document.getElementById('artworks-list');
+                const artworkCountSpan = document.getElementById('artwork-count');
+                if (artworksList) {
+                    artworksList.innerHTML = '<p>新しい作品が登録されました。</p>';
+                }
+                if (artworkCountSpan) {
+                    artworkCountSpan.textContent = '0';
+                }
+            }
         } else {
             const errorData = await response.json();
             openMessageModal('エラー: ' + (errorData.detail || '保存に失敗しました'), 'error'); // ポップアップ表示に変更
