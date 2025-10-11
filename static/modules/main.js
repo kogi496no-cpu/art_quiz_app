@@ -63,7 +63,19 @@ function initializeEventListeners() {
             e.preventDefault();
             const query = document.getElementById('search-input').value.trim();
             currentSearchQuery = query; // ★追加: 検索クエリを保存
-            loadArtworks(query, currentGenre);
+            if (query) {
+                loadArtworks(query, currentGenre);
+            } else {
+                // 検索クエリが空の場合は、リストをクリアしてメッセージを表示
+                const artworksList = document.getElementById('artworks-list');
+                if (artworksList) {
+                    artworksList.innerHTML = '<p>検索キーワードを入力してください。</p>';
+                    const artworkCountSpan = document.getElementById('artwork-count');
+                    if (artworkCountSpan) {
+                        artworkCountSpan.textContent = '0';
+                    }
+                }
+            }
         });
         
     }
